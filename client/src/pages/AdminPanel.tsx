@@ -51,6 +51,7 @@ export default function AdminPanel() {
   const [editFacility, setEditFacility] = useState<any>(null);
   const [showCreateFacility, setShowCreateFacility] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
+  const [showCreateUser, setShowCreateUser] = useState(false);
   const [inviteResult, setInviteResult] = useState<{ inviteUrl: string; email: string } | null>(null);
   const [prefillEmail, setPrefillEmail] = useState("");
   const [search, setSearch] = useState("");
@@ -98,9 +99,18 @@ export default function AdminPanel() {
     onError: (err) => toast.error(err.message),
   });
 
+  const createUser = trpc.admin.createUser.useMutation({
+    onSuccess: () => { utils.admin.listUsers.invalidate(); setShowCreateUser(false); toast.success("User created successfully"); resetCreate(); },
+    onError: (err) => toast.error(err.message),
+  });
+
   const updateRequest = trpc.system.updateAccessRequest.useMutation({
     onSuccess: () => { utils.system.listAccessRequests.invalidate(); toast.success("Request updated"); },
     onError: (err) => toast.error(err.message),
+  });
+
+  const { register: registerCreate, handleSubmit: handleSubmitCreate, reset: resetCreate, setValue: setValueCreate } = useForm({
+    defaultValues: { name: "", email: "", role: "viewer", facilityId: undefined as number | undefined, jobTitle: "", phone: "", preferredLang: "en" },
   });
 
   const { register: registerU, handleSubmit: handleSubmitU, setValue: setValueU } = useForm();
@@ -257,6 +267,9 @@ export default function AdminPanel() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input className="pl-9" placeholder="Search users..." value={search} onChange={e => setSearch(e.target.value)} />
             </div>
+            {user?.role === "superadmin" && (
+              <Button onClick={() => setShowCreateUser(true)}><Plus className="h-4 w-4 mr-2" />Add User</Button>
+            )}
           </div>
           <Card>
             <CardContent className="p-0">
@@ -480,6 +493,63 @@ export default function AdminPanel() {
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowCreateFacility(false)}>Cancel</Button>
               <Button type="submit" disabled={createFacility.isPending}>{createFacility.isPending ? "Creating..." : "Create Facility"}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      {/* ── Create User Dialog (Superadmin only) ─────────────────────────────── */}
+      <Dialog open={showCreateUser} onOpenChange={setShowCreateUser}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-primary" />
+              Add User — إضافة مستخدم
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmitCreate(d => createUser.mutate(d as any))} className="space-y-4">
+            <div className="p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground">
+              Creates a user account directly. The user will need an invite link to sign in for the first time, or you can send one from the Invitations tab after creating the account.
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2 col-span-2"><Label>Full Name *</Label><Input {...registerCreate("name", { required: true })} placeholder="Dr. Ahmed Al-Rashidi" /></div>
+              <div className="space-y-2 col-span-2"><Label>Email Address *</Label><Input {...registerCreate("email", { required: true })} type="email" placeholder="user@example.com" /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Role</Label>
+                <Select onValueChange={v => setValueCreate("role", v)} defaultValue="viewer">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{roles.map(r => <SelectItem key={r} value={r}><span className={roleColors[r]}>{roleLabels[r]}</span></SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Language</Label>
+                <Select onValueChange={v => setValueCreate("preferredLang", v)} defaultValue="en">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="ar">العربية</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2"><Label>Job Title</Label><Input {...registerCreate("jobTitle")} placeholder="Emergency Physician" /></div>
+              <div className="space-y-2"><Label>Phone</Label><Input {...registerCreate("phone")} placeholder="+965-XXXX-XXXX" /></div>
+            </div>
+            <div className="space-y-2">
+              <Label>Facility (optional)</Label>
+              <Select onValueChange={v => setValueCreate("facilityId", Number(v))}>
+                <SelectTrigger><SelectValue placeholder="No specific facility" /></SelectTrigger>
+                <SelectContent>{facilities?.map(f => <SelectItem key={f.id} value={f.id.toString()}>{f.name}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowCreateUser(false)}>Cancel</Button>
+              <Button type="submit" disabled={createUser.isPending}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                {createUser.isPending ? "Creating..." : "Create User"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>

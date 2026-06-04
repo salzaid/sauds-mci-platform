@@ -37,6 +37,47 @@ export const adminRouter = router({
       return query.orderBy(desc(users.createdAt)).limit(input.limit).offset(input.offset);
     }),
 
+  createUser: protectedProcedure
+    .input(z.object({
+      name: z.string().min(2).max(256),
+      email: z.string().email(),
+      role: z.enum(roles).default("viewer"),
+      facilityId: z.number().optional(),
+      jobTitle: z.string().max(128).optional(),
+      phone: z.string().max(32).optional(),
+      preferredLang: z.enum(["en","ar"]).default("en"),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.user.role !== "superadmin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only superadmins can create users directly." });
+      }
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      // Check for duplicate email
+      const existing = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
+      if (existing.length > 0) {
+        throw new TRPCError({ code: "CONFLICT", message: "A user with this email already exists." });
+      }
+      // Generate a deterministic openId for manually-created users
+      const { nanoid } = await import("nanoid");
+      const openId = `manual-${nanoid(24)}`;
+      await db.insert(users).values({
+        openId,
+        name: input.name,
+        email: input.email,
+        loginMethod: "manual",
+        role: input.role,
+        facilityId: input.facilityId,
+        jobTitle: input.jobTitle,
+        phone: input.phone,
+        preferredLang: input.preferredLang,
+        isActive: true,
+        lastSignedIn: new Date(),
+      });
+      const [created] = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+      return created;
+    }),
+
   updateUser: protectedProcedure
     .input(z.object({
       id: z.number(),
