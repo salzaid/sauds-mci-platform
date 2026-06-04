@@ -100,8 +100,8 @@ export default function MCILayout({ children }: MCILayoutProps) {
       <div className="flex items-center gap-2 px-4 py-4 border-b border-sidebar-border">
         <AlertTriangle className="h-6 w-6 text-primary shrink-0" />
         <div className="min-w-0">
-          <div className="font-bold text-sm text-sidebar-foreground truncate">MCI Platform</div>
-          <div className="text-xs text-muted-foreground truncate">Kuwait MoH</div>
+          <div className="font-bold text-sm text-sidebar-foreground truncate">Saud's MCI Platform</div>
+          <div className="text-xs text-muted-foreground truncate">منصة سعود للكوارث</div>
         </div>
       </div>
 
@@ -182,7 +182,7 @@ export default function MCILayout({ children }: MCILayoutProps) {
           </button>
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-primary" />
-            <span className="font-bold text-sm">MCI Platform</span>
+            <span className="font-bold text-sm">Saud's MCI</span>
           </div>
           <button onClick={() => setLang(lang === "en" ? "ar" : "en")} className="text-muted-foreground text-xs font-medium">
             {lang === "en" ? "AR" : "EN"}

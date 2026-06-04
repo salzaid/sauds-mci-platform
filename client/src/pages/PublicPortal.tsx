@@ -36,7 +36,7 @@ export default function PublicPortal() {
             <Link href="/" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /></Link>
             <AlertTriangle className="h-5 w-5 text-primary" />
             <div>
-              <p className="font-semibold text-sm">MCI Platform — Kuwait MoH</p>
+              <p className="font-semibold text-sm">Saud's MCI Platform</p>
               <p className="text-xs text-muted-foreground">Family Reunification Portal — بوابة لمّ شمل الأسر</p>
             </div>
           </div>

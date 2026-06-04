@@ -36,15 +36,15 @@ export default function Home() {
                 <AlertTriangle className="h-8 w-8 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground font-medium">Kuwait Ministry of Health</p>
-                <p className="text-xs text-muted-foreground">وزارة الصحة — دولة الكويت</p>
+          <p className="text-sm text-muted-foreground font-medium">Saud's MCI Platform</p>
+            <p className="text-xs text-muted-foreground">منصة سعود للكوارث الطبية</p>
               </div>
             </div>
-            <h1 className="text-5xl font-bold tracking-tight mb-3">
-              MCI & Disaster<br />
-              <span className="text-primary">Management Platform</span>
-            </h1>
-            <p className="text-xl text-muted-foreground mb-2">منصة إدارة حوادث الإصابات الجماعية والكوارث</p>
+<h1 className="text-5xl font-bold tracking-tight mb-3">
+            Saud's MCI &<br />
+            <span className="text-primary">Disaster Platform</span>
+          </h1>
+          <p className="text-xl text-muted-foreground mb-2">منصة سعود لإدارة حوادث الإصابات الجماعية والكوارث</p>
             <p className="text-muted-foreground mb-8 max-w-xl">
               A comprehensive platform supporting the full chain of survival — from scene triage through definitive surgical care, inter-facility coordination, and after-action review.
             </p>
