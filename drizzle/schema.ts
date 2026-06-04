@@ -359,3 +359,22 @@ export const invitations = mysqlTable("invitations", {
 
 export type Invitation = typeof invitations.$inferSelect;
 export type InsertInvitation = typeof invitations.$inferInsert;
+
+// ─── Access Requests ────────────────────────────────────────────────────────────
+
+export const accessRequests = mysqlTable("access_requests", {
+  id: int("id").autoincrement().primaryKey(),
+  fullName: varchar("fullName", { length: 128 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  jobTitle: varchar("jobTitle", { length: 128 }).notNull(),
+  facility: varchar("facility", { length: 256 }).notNull(),
+  reason: text("reason").notNull(),
+  status: mysqlEnum("status", ["PENDING","INVITED","REJECTED"]).default("PENDING").notNull(),
+  reviewedById: int("reviewedById"),
+  reviewedAt: timestamp("reviewedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AccessRequest = typeof accessRequests.$inferSelect;
+export type InsertAccessRequest = typeof accessRequests.$inferInsert;

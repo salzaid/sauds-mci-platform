@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle, Plus, ChevronRight, CheckCircle, XCircle, HelpCircle } from "lucide-react";
+import { Link } from "wouter";
 import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
 
@@ -177,7 +178,7 @@ export default function Triage({ incidentId }: { incidentId?: number }) {
                     <div className="flex items-center gap-2">
                       {c.identityConfirmed && <Badge variant="outline" className="text-green-400 border-green-500/30 text-xs">ID Confirmed</Badge>}
                       <Button variant="ghost" size="sm" asChild>
-                        <a href={`/casualties/${c.id}`}><ChevronRight className="h-4 w-4" /></a>
+                        <Link href={`/casualties/${c.id}`}><ChevronRight className="h-4 w-4" /></Link>
                       </Button>
                     </div>
                   </div>

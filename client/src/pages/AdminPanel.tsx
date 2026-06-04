@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Settings, Users, Building2, Shield, Search, Plus, Edit, Mail, Send, Copy, RefreshCw, XCircle, Clock } from "lucide-react";
+import { Settings, Users, Building2, Shield, Search, Plus, Edit, Mail, Send, Copy, RefreshCw, XCircle, Clock, UserPlus, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -38,6 +38,12 @@ const inviteStatusColors: Record<string, string> = {
   EXPIRED: "bg-muted text-muted-foreground border-border",
 };
 
+const requestStatusColors: Record<string, string> = {
+  PENDING: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  INVITED: "bg-green-500/20 text-green-400 border-green-500/30",
+  REJECTED: "bg-muted text-muted-foreground border-border",
+};
+
 export default function AdminPanel() {
   const { t } = useLang();
   const { user } = useAuth();
@@ -46,6 +52,7 @@ export default function AdminPanel() {
   const [showCreateFacility, setShowCreateFacility] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteResult, setInviteResult] = useState<{ inviteUrl: string; email: string } | null>(null);
+  const [prefillEmail, setPrefillEmail] = useState("");
   const [search, setSearch] = useState("");
   const utils = trpc.useUtils();
 
@@ -53,6 +60,9 @@ export default function AdminPanel() {
   const { data: facilities, isLoading: facilitiesLoading } = trpc.admin.listFacilities.useQuery({ includeInactive: true });
   const { data: auditLogs } = trpc.admin.listAuditLogs.useQuery({ limit: 50 });
   const { data: invitesList, isLoading: invitesLoading } = trpc.invitations.list.useQuery({ limit: 50 });
+  const { data: accessRequests, isLoading: requestsLoading } = trpc.system.listAccessRequests.useQuery({ limit: 50 });
+
+  const pendingRequestCount = accessRequests?.filter(r => r.status === "PENDING").length ?? 0;
 
   const updateUser = trpc.admin.updateUser.useMutation({
     onSuccess: () => { utils.admin.listUsers.invalidate(); setEditUser(null); toast.success("User updated"); },
@@ -61,11 +71,6 @@ export default function AdminPanel() {
 
   const createFacility = trpc.admin.createFacility.useMutation({
     onSuccess: () => { utils.admin.listFacilities.invalidate(); setShowCreateFacility(false); toast.success("Facility created"); resetFac(); },
-    onError: (err) => toast.error(err.message),
-  });
-
-  const updateFacility = trpc.admin.updateFacility.useMutation({
-    onSuccess: () => { utils.admin.listFacilities.invalidate(); setEditFacility(null); toast.success("Facility updated"); },
     onError: (err) => toast.error(err.message),
   });
 
@@ -93,12 +98,17 @@ export default function AdminPanel() {
     onError: (err) => toast.error(err.message),
   });
 
+  const updateRequest = trpc.system.updateAccessRequest.useMutation({
+    onSuccess: () => { utils.system.listAccessRequests.invalidate(); toast.success("Request updated"); },
+    onError: (err) => toast.error(err.message),
+  });
+
   const { register: registerU, handleSubmit: handleSubmitU, setValue: setValueU } = useForm();
   const { register: registerF, handleSubmit: handleSubmitF, reset: resetFac, setValue: setValueF } = useForm({
     defaultValues: { name: "", nameAr: "", code: "", type: "hospital", city: "", phone: "", traumaLevel: "", totalBeds: 0, icuBeds: 0, orRooms: 0, ventilators: 0 },
   });
   const { register: registerI, handleSubmit: handleSubmitI, reset: resetInvite, setValue: setValueI } = useForm({
-    defaultValues: { email: "", role: "viewer", facilityId: undefined as number | undefined, message: "" },
+    defaultValues: { email: prefillEmail, role: "viewer", facilityId: undefined as number | undefined, message: "" },
   });
 
   const isAdmin = user?.role === "superadmin" || user?.role === "admin";
@@ -110,31 +120,92 @@ export default function AdminPanel() {
   );
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => toast.success("Invite link copied to clipboard!")).catch(() => toast.error("Could not copy — please copy manually"));
+    navigator.clipboard.writeText(text).then(() => toast.success("Copied!")).catch(() => toast.error("Could not copy"));
+  };
+
+  const handleInviteFromRequest = (email: string, facility: string) => {
+    setPrefillEmail(email);
+    setValueI("email", email);
+    setValueI("message", `Approved access request from ${facility}`);
+    setShowInvite(true);
   };
 
   return (
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Admin Panel — لوحة الإدارة</h1>
-        <p className="text-muted-foreground text-sm mt-1">User management, invitations, facilities, roles, and audit logs</p>
+        <p className="text-muted-foreground text-sm mt-1">User management, invitations, access requests, facilities, and audit logs</p>
       </div>
 
-      <Tabs defaultValue="invitations">
+      <Tabs defaultValue="requests">
         <TabsList>
+          <TabsTrigger value="requests" className="relative">
+            <UserPlus className="h-4 w-4 mr-2" />Access Requests
+            {pendingRequestCount > 0 && (
+              <span className="ml-2 bg-primary text-primary-foreground text-xs rounded-full px-1.5 py-0.5 min-w-[18px] text-center leading-none">
+                {pendingRequestCount}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="invitations"><Mail className="h-4 w-4 mr-2" />Invitations</TabsTrigger>
           <TabsTrigger value="users"><Users className="h-4 w-4 mr-2" />Users</TabsTrigger>
           <TabsTrigger value="facilities"><Building2 className="h-4 w-4 mr-2" />Facilities</TabsTrigger>
           <TabsTrigger value="audit"><Shield className="h-4 w-4 mr-2" />Audit Log</TabsTrigger>
         </TabsList>
 
+        {/* ── Access Requests Tab ─────────────────────────────────────────────── */}
+        <TabsContent value="requests" className="space-y-4 mt-4">
+          <p className="text-sm text-muted-foreground">
+            Hospital staff who submitted a request from the landing page. Review each request and send an invitation directly from here.
+          </p>
+          {requestsLoading ? Array.from({length:3}).map((_,i) => <Skeleton key={i} className="h-24" />) :
+          accessRequests?.length === 0 ? (
+            <Card><CardContent className="py-12 text-center text-muted-foreground">
+              <UserPlus className="h-10 w-10 mx-auto mb-3 opacity-20" />
+              <p>No access requests yet</p>
+            </CardContent></Card>
+          ) : accessRequests?.map(req => (
+            <Card key={req.id} className={req.status === "PENDING" ? "border-yellow-500/30" : ""}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <Badge variant="outline" className={requestStatusColors[req.status]}>{req.status}</Badge>
+                      <span className="text-xs text-muted-foreground">{new Date(req.createdAt).toLocaleString()}</span>
+                    </div>
+                    <p className="font-semibold">{req.fullName}</p>
+                    <p className="text-sm text-muted-foreground">{req.jobTitle} — {req.facility}</p>
+                    <p className="text-sm text-primary">{req.email}</p>
+                    <p className="text-xs text-muted-foreground mt-2 italic">"{req.reason}"</p>
+                  </div>
+                  {req.status === "PENDING" && (
+                    <div className="flex flex-col gap-2 shrink-0">
+                      <Button size="sm" onClick={() => { handleInviteFromRequest(req.email, req.facility); updateRequest.mutate({ id: req.id, status: "INVITED" }); }}>
+                        <Mail className="h-3 w-3 mr-1" />Send Invite
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-destructive hover:text-destructive"
+                        onClick={() => updateRequest.mutate({ id: req.id, status: "REJECTED" })}>
+                        <XCircle className="h-3 w-3 mr-1" />Reject
+                      </Button>
+                    </div>
+                  )}
+                  {req.status === "INVITED" && (
+                    <div className="flex items-center gap-1 text-green-400 text-xs shrink-0">
+                      <CheckCircle className="h-4 w-4" />Invited
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+
         {/* ── Invitations Tab ─────────────────────────────────────────────────── */}
         <TabsContent value="invitations" className="space-y-4 mt-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Invite people to the platform before they sign in. They'll receive a link to claim their account with a pre-assigned role.</p>
+            <p className="text-sm text-muted-foreground">Invite people to the platform before they sign in.</p>
             <Button onClick={() => setShowInvite(true)}><Plus className="h-4 w-4 mr-2" />Send Invitation</Button>
           </div>
-
           <div className="space-y-3">
             {invitesLoading ? Array.from({length:3}).map((_,i) => <Skeleton key={i} className="h-16" />) :
             invitesList?.length === 0 ? (
@@ -155,15 +226,8 @@ export default function AdminPanel() {
                       <p className="font-medium text-sm">{inv.email}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         Invited by {inv.invitedByName} · {new Date(inv.createdAt).toLocaleDateString()}
-                        {inv.status === "PENDING" && (
-                          <span className="ml-2 flex items-center gap-1 inline-flex">
-                            <Clock className="h-3 w-3" />
-                            Expires {new Date(inv.expiresAt).toLocaleDateString()}
-                          </span>
-                        )}
-                        {inv.status === "ACCEPTED" && inv.acceptedAt && (
-                          <span className="ml-2 text-green-400">Accepted {new Date(inv.acceptedAt).toLocaleDateString()}</span>
-                        )}
+                        {inv.status === "PENDING" && <span className="ml-2">· Expires {new Date(inv.expiresAt).toLocaleDateString()}</span>}
+                        {inv.status === "ACCEPTED" && inv.acceptedAt && <span className="ml-2 text-green-400">· Accepted {new Date(inv.acceptedAt).toLocaleDateString()}</span>}
                       </p>
                       {inv.message && <p className="text-xs text-muted-foreground italic mt-1">"{inv.message}"</p>}
                     </div>
@@ -274,10 +338,8 @@ export default function AdminPanel() {
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead><tr className="border-b border-border text-muted-foreground">
-                    <th className="text-left p-3">Time</th>
-                    <th className="text-left p-3">User</th>
-                    <th className="text-left p-3">Action</th>
-                    <th className="text-left p-3">Resource</th>
+                    <th className="text-left p-3">Time</th><th className="text-left p-3">User</th>
+                    <th className="text-left p-3">Action</th><th className="text-left p-3">Resource</th>
                     <th className="text-left p-3">IP</th>
                   </tr></thead>
                   <tbody className="divide-y divide-border">
@@ -302,15 +364,13 @@ export default function AdminPanel() {
       </Tabs>
 
       {/* ── Send Invitation Dialog ─────────────────────────────────────────────── */}
-      <Dialog open={showInvite} onOpenChange={v => { setShowInvite(v); if (!v) setInviteResult(null); }}>
+      <Dialog open={showInvite} onOpenChange={v => { setShowInvite(v); if (!v) { setInviteResult(null); setPrefillEmail(""); } }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Mail className="h-5 w-5 text-primary" />
-              Send Invitation — دعوة مستخدم جديد
+              <Mail className="h-5 w-5 text-primary" />Send Invitation — دعوة مستخدم جديد
             </DialogTitle>
           </DialogHeader>
-
           {inviteResult ? (
             <div className="space-y-4">
               <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl text-center">
@@ -321,55 +381,43 @@ export default function AdminPanel() {
                 <Label>Invite Link</Label>
                 <div className="flex gap-2">
                   <Input value={inviteResult.inviteUrl} readOnly className="text-xs font-mono" />
-                  <Button size="icon" variant="outline" onClick={() => copyToClipboard(inviteResult.inviteUrl)}>
-                    <Copy className="h-4 w-4" />
-                  </Button>
+                  <Button size="icon" variant="outline" onClick={() => copyToClipboard(inviteResult.inviteUrl)}><Copy className="h-4 w-4" /></Button>
                 </div>
-                <p className="text-xs text-muted-foreground">The invitee can also receive this via email if configured. The link expires in 7 days.</p>
+                <p className="text-xs text-muted-foreground">The link expires in 7 days.</p>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => { setInviteResult(null); }}>Send Another</Button>
-                <Button onClick={() => { setShowInvite(false); setInviteResult(null); }}>Done</Button>
+                <Button variant="outline" onClick={() => { setInviteResult(null); setPrefillEmail(""); }}>Send Another</Button>
+                <Button onClick={() => { setShowInvite(false); setInviteResult(null); setPrefillEmail(""); }}>Done</Button>
               </DialogFooter>
             </div>
           ) : (
             <form onSubmit={handleSubmitI(d => sendInvite.mutate({ ...d as any, origin: window.location.origin }))} className="space-y-4">
               <div className="space-y-2">
                 <Label>Email Address *</Label>
-                <Input {...registerI("email", { required: true })} type="email" placeholder="colleague@example.com" />
+                <Input {...registerI("email", { required: true })} type="email" placeholder="colleague@example.com" defaultValue={prefillEmail} />
               </div>
               <div className="space-y-2">
                 <Label>Assigned Role</Label>
                 <Select onValueChange={v => setValueI("role", v)} defaultValue="viewer">
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {roles.map(r => (
-                      <SelectItem key={r} value={r}>
-                        <span className={roleColors[r]}>{roleLabels[r]}</span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+                  <SelectContent>{roles.map(r => <SelectItem key={r} value={r}><span className={roleColors[r]}>{roleLabels[r]}</span></SelectItem>)}</SelectContent>
                 </Select>
-                <p className="text-xs text-muted-foreground">The user will be assigned this role when they accept the invitation.</p>
               </div>
               <div className="space-y-2">
                 <Label>Facility (optional)</Label>
                 <Select onValueChange={v => setValueI("facilityId", Number(v))}>
                   <SelectTrigger><SelectValue placeholder="No specific facility" /></SelectTrigger>
-                  <SelectContent>
-                    {facilities?.map(f => <SelectItem key={f.id} value={f.id.toString()}>{f.name}</SelectItem>)}
-                  </SelectContent>
+                  <SelectContent>{facilities?.map(f => <SelectItem key={f.id} value={f.id.toString()}>{f.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label>Personal Message (optional)</Label>
-                <Textarea {...registerI("message")} placeholder="e.g. Welcome to the team! You'll be covering the ED triage shift." rows={3} maxLength={500} />
+                <Textarea {...registerI("message")} rows={3} maxLength={500} />
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setShowInvite(false)}>Cancel</Button>
                 <Button type="submit" disabled={sendInvite.isPending}>
-                  <Send className="h-4 w-4 mr-2" />
-                  {sendInvite.isPending ? "Creating..." : "Create Invitation"}
+                  <Send className="h-4 w-4 mr-2" />{sendInvite.isPending ? "Creating..." : "Create Invitation"}
                 </Button>
               </DialogFooter>
             </form>
@@ -415,9 +463,7 @@ export default function AdminPanel() {
               <div className="space-y-2"><Label>Type</Label>
                 <Select onValueChange={v => setValueF("type", v)} defaultValue="hospital">
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {["hospital","field_hospital","clinic","command_center"].map(t => <SelectItem key={t} value={t}>{t.replace(/_/g," ")}</SelectItem>)}
-                  </SelectContent>
+                  <SelectContent>{["hospital","field_hospital","clinic","command_center"].map(t => <SelectItem key={t} value={t}>{t.replace(/_/g," ")}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             </div>

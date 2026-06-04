@@ -56,7 +56,7 @@ export default function CasualtyDetail({ id }: { id: number }) {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-start gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1 as any)}><ArrowLeft className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon" onClick={() => { if (window.history.length > 1) { window.history.back(); } else { navigate("/tracking"); } }}><ArrowLeft className="h-4 w-4" /></Button>
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className={`text-xs px-2 py-1 rounded font-bold ${triageColors[casualty.currentTriageCategory]}`}>{casualty.currentTriageCategory}</span>
