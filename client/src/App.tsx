@@ -23,6 +23,13 @@ import Comms from "./pages/Comms";
 import AdminPanel from "./pages/AdminPanel";
 import PublicPortal from "./pages/PublicPortal";
 import InvitePage from "./pages/InvitePage";
+import DemoHome from "./pages/demo/DemoHome";
+import DemoLayout from "./components/DemoLayout";
+import {
+  DemoDashboard, DemoIncidents, DemoIncidentDetail, DemoTriage,
+  DemoPatientTracking, DemoCasualtyDetail, DemoORQueue, DemoResources,
+  DemoTransport, DemoICSForms, DemoEMTMds, DemoAAR, DemoComms, DemoPublicPortal
+} from "./pages/demo/DemoPages";
 
 function Router() {
   return (
@@ -30,6 +37,69 @@ function Router() {
       {/* Public routes */}
       <Route path="/" component={Home} />
       <Route path="/public-portal" component={PublicPortal} />
+      {/* Demo routes — no authentication required */}
+      <Route path="/demo" component={DemoHome} />
+      <Route path="/demo/dashboard">
+        <DemoLayout><DemoDashboard /></DemoLayout>
+      </Route>
+      <Route path="/demo/incidents">
+        <DemoLayout><DemoIncidents /></DemoLayout>
+      </Route>
+      <Route path="/demo/incidents/:id">
+        {(params) => <DemoLayout><DemoIncidentDetail id={Number(params.id)} /></DemoLayout>}
+      </Route>
+      <Route path="/demo/triage">
+        <DemoLayout><DemoTriage /></DemoLayout>
+      </Route>
+      <Route path="/demo/triage/:incidentId">
+        {(params) => <DemoLayout><DemoTriage incidentId={Number(params.incidentId)} /></DemoLayout>}
+      </Route>
+      <Route path="/demo/tracking">
+        <DemoLayout><DemoPatientTracking /></DemoLayout>
+      </Route>
+      <Route path="/demo/tracking/:incidentId">
+        {(params) => <DemoLayout><DemoPatientTracking incidentId={Number(params.incidentId)} /></DemoLayout>}
+      </Route>
+      <Route path="/demo/casualties/:id">
+        {(params) => <DemoLayout><DemoCasualtyDetail id={Number(params.id)} /></DemoLayout>}
+      </Route>
+      <Route path="/demo/or-queue">
+        <DemoLayout><DemoORQueue /></DemoLayout>
+      </Route>
+      <Route path="/demo/or-queue/:incidentId">
+        {(params) => <DemoLayout><DemoORQueue incidentId={Number(params.incidentId)} /></DemoLayout>}
+      </Route>
+      <Route path="/demo/resources">
+        <DemoLayout><DemoResources /></DemoLayout>
+      </Route>
+      <Route path="/demo/transport">
+        <DemoLayout><DemoTransport /></DemoLayout>
+      </Route>
+      <Route path="/demo/transport/:incidentId">
+        {(params) => <DemoLayout><DemoTransport incidentId={Number(params.incidentId)} /></DemoLayout>}
+      </Route>
+      <Route path="/demo/ics-forms">
+        <DemoLayout><DemoICSForms /></DemoLayout>
+      </Route>
+      <Route path="/demo/ics-forms/:incidentId">
+        {(params) => <DemoLayout><DemoICSForms incidentId={Number(params.incidentId)} /></DemoLayout>}
+      </Route>
+      <Route path="/demo/emt-mds">
+        <DemoLayout><DemoEMTMds /></DemoLayout>
+      </Route>
+      <Route path="/demo/aar">
+        <DemoLayout><DemoAAR /></DemoLayout>
+      </Route>
+      <Route path="/demo/comms">
+        <DemoLayout><DemoComms /></DemoLayout>
+      </Route>
+      <Route path="/demo/comms/:incidentId">
+        {(params) => <DemoLayout><DemoComms incidentId={Number(params.incidentId)} /></DemoLayout>}
+      </Route>
+      <Route path="/demo/public-portal">
+        <DemoLayout><DemoPublicPortal /></DemoLayout>
+      </Route>
+
       <Route path="/invite/:token">
         {(params) => <InvitePage token={params.token} />}
       </Route>

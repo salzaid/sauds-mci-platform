@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
-import { AlertTriangle, Globe, Stethoscope, Activity, Shield, Truck, BarChart3, Users, Lock, Send, CheckCircle } from "lucide-react";
+import { AlertTriangle, Globe, Stethoscope, Activity, Shield, Truck, BarChart3, Users, Lock, Send, CheckCircle, Eye } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,6 +79,10 @@ export default function Home() {
               <Button variant="outline" onClick={() => setShowForm(v => !v)}>
                 {showForm ? "Hide form" : "Request Access"}
               </Button>
+              <Link href="/demo" className="inline-flex items-center gap-2 text-sm text-yellow-400 hover:text-yellow-300 transition-colors self-center font-medium">
+                <Eye className="h-4 w-4" />
+                Interactive Demo
+              </Link>
               <Link href="/public-portal" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors self-center">
                 <Globe className="h-4 w-4" />
                 Family Reunification Portal
