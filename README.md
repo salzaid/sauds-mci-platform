@@ -1,1090 +1,319 @@
-# Web App Template (tRPC + Manus Auth + Database)
+# Saud's MCI & Disaster Management Platform
 
-This template gives you a React 19 + Tailwind 4 + Express 4 + tRPC 11 stack with Manus OAuth already wired. Procedures are your contracts, types flow end to end, and authentication "just works".
+> **A comprehensive, web-based Mass Casualty Incident (MCI) and Disaster Management Platform for the Kuwait Ministry of Health and hospital networks.**
 
----
-
-## Quick Facts
-
-- **tRPC-first:** define procedures in `server/routers.ts`, consume them with `trpc.*` hooks.
-- **Superjson out of the box:** return Drizzle rows directly—`Date` stays a `Date`.
-- **Auth baked in:** `/api/oauth/callback` handles Manus OAuth, `protectedProcedure` injects `ctx.user`.
-- **Gateway-ready:** all RPC traffic is under `/api/trpc`, making it easy to route at the edge.
+Built and designed by **Saud Naji Alzaid**, this platform supports the full chain of survival — from scene triage through definitive surgical care, inter-facility coordination, and after-action review — aligned with internationally recognised standards including SALT, HICS, CO-S-TR, WHO EMT MDS, and HL7 FHIR R4/R5.
 
 ---
 
-## Build Loop (Four Touch Points)
+## Table of Contents
 
-1. Update schema in `drizzle/schema.ts`, then run `pnpm db:push`.
-2. Add database helpers in `server/db.ts` (return raw results).
-3. Add or extend procedures in `server/routers.ts`, then wire the UI with `trpc.*.useQuery/useMutation`.
-4. Build frontend experience according to `Frontend Workflow`
-5. Cover your changes with Vitest specs inside `server/*.test.ts` (see `server/auth.logout.test.ts`) and run `pnpm test`.
-
-That's it—no manual REST routes, no Axios client, no shared contract files.
+1. [Overview](#overview)
+2. [Platform Modules](#platform-modules)
+3. [Technology Stack](#technology-stack)
+4. [Quick Start (Local Development)](#quick-start-local-development)
+5. [Deployment & Hosting](#deployment--hosting)
+6. [Environment Variables](#environment-variables)
+7. [Database Setup](#database-setup)
+8. [User Access & Invitations](#user-access--invitations)
+9. [Role Reference](#role-reference)
+10. [Standards Compliance](#standards-compliance)
+11. [License](#license)
+12. [Credits & Acknowledgements](#credits--acknowledgements)
 
 ---
 
-## Key Files
+## Overview
 
+Saud's MCI Platform is a full-stack web application that provides real-time situational awareness and operational coordination during mass casualty incidents and disasters. It is designed for use by hospital incident command teams, emergency physicians, triage officers, logistics coordinators, and Ministry of Health oversight personnel.
+
+The platform is **invite-only** by design — access is controlled exclusively by administrators who issue time-limited invitation links. Uninvited hospital staff may submit a Request Access form from the landing page, which notifies the administrator for review.
+
+---
+
+## Platform Modules
+
+| Module | Description |
+|---|---|
+| **Scene Triage** | SALT, START, and JumpSTART (paediatric) decision trees with guided casualty registration |
+| **Patient Tracking** | HICS 254-equivalent immutable event log from scene to discharge |
+| **Hospital Command Dashboard** | CO-S-TR tiles: triage tally, OR queue, blood bank, ventilators, ICU census |
+| **Incident Management** | Full incident lifecycle (ACTIVATED → ESCALATED → DEACTIVATED → CLOSED) |
+| **OR / Surgical Queue** | 11-state surgical case machine with damage-control surgery flag and MTP tracking |
+| **Resources & Logistics** | Real-time inventory for ventilators, ICU/OR beds, blood products, PPE, medications |
+| **Transport** | Inter-facility transport manifests and status tracking |
+| **ICS Forms** | HICS 201, 202, 203, 204, 205A, 213, 214, and 254 form submission and acknowledgement |
+| **WHO EMT MDS** | 85-item Emergency Medical Team Minimum Data Set daily reporting |
+| **Communications** | Incident-scoped messaging by channel (Command, Operations, Logistics, Medical) and priority |
+| **After-Action Review** | KPI dashboard with mortality rate, OR throughput, identity confirmation rate |
+| **Public Family Reunification Portal** | Privacy-preserving status lookup for family members (no PHI exposed) |
+| **Admin Panel** | User management, invitations, access request review, facility management, audit log |
+
+---
+
+## Technology Stack
+
+| Layer | Technology |
+|---|---|
+| **Frontend** | React 19, TypeScript, Tailwind CSS 4, shadcn/ui, Wouter, Recharts |
+| **Backend** | Node.js, Express 4, tRPC 11 (end-to-end type safety) |
+| **Database** | MySQL / TiDB (via Drizzle ORM) |
+| **Authentication** | Manus OAuth 2.0 (OpenID Connect) |
+| **Real-time** | Auto-polling with configurable intervals (10–30 s per module) |
+| **Internationalisation** | Custom i18n context — English and Arabic (RTL) |
+| **Testing** | Vitest — 61 unit tests covering triage algorithms, OR state machine, role guards |
+| **Build** | Vite 7, esbuild, pnpm |
+
+---
+
+## Quick Start (Local Development)
+
+### Prerequisites
+
+- **Node.js** ≥ 22 and **pnpm** ≥ 10
+- A **MySQL 8** (or TiDB) database
+- A **Manus** account for OAuth (or configure a compatible OIDC provider)
+
+### Installation
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-org/mci-platform.git
+cd mci-platform
+
+# 2. Install dependencies
+pnpm install
+
+# 3. Copy the environment template and fill in your values
+cp .env.example .env
+
+# 4. Push the database schema
+pnpm drizzle-kit generate
+# Then apply the generated SQL to your database
+
+# 5. Start the development server
+pnpm dev
 ```
-server/auth.logout.test.ts → Reference sample vitest test file
-drizzle/schema.ts → Database tables & types
-server/db.ts → Query helpers (reuse across procedures)
-server/routers.ts → tRPC procedures (auth + features)
-client/src/App.tsx → Routes wiring & layout shells
-client/src/lib/trpc.ts → tRPC client binding
-client/src/pages/ → Feature UI that calls trpc hooks
+
+The application will be available at `http://localhost:3000`.
+
+### Running Tests
+
+```bash
+pnpm test
 ```
 
-Framework plumbing (OAuth, context, Vite bridge) lives under `server/_core`.
+All 61 tests should pass. The test suite covers the SALT triage algorithm, OR case state machine, role-based access guards, invite flow logic, and resource utilisation calculations.
 
 ---
 
-## File Structure
+## Deployment & Hosting
 
+### Hosted on Manus (Recommended)
+
+This platform is designed to run on [Manus](https://manus.im) with zero-configuration deployment. After making changes:
+
+1. Ensure all tests pass: `pnpm test`
+2. Create a checkpoint from the Management UI or via the platform tools
+3. Click the **Publish** button in the Manus Management UI header
+
+Manus provides built-in hosting with custom domain support, automatic SSL, a managed MySQL database, and OAuth integration. No additional infrastructure is required.
+
+### Self-Hosted Deployment
+
+For on-premises or cloud deployments (e.g., Kuwait MoH data-residency requirements):
+
+#### Option A — Docker (Recommended for self-hosting)
+
+```bash
+# Build the production image
+docker build -t mci-platform:latest .
+
+# Run with environment variables
+docker run -d \
+  -p 3000:3000 \
+  -e DATABASE_URL="mysql://user:password@host:3306/mci" \
+  -e JWT_SECRET="your-secret-here" \
+  -e VITE_APP_ID="your-oauth-app-id" \
+  -e OAUTH_SERVER_URL="https://your-oauth-server" \
+  mci-platform:latest
 ```
-client/
-  public/         ← Small configuration files ONLY (favicon.ico, robots.txt). DO NOT put images/media here.
-  src/
-    pages/        ← Page-level components
-    components/   ← Reusable UI & shadcn/ui
-    contexts/     ← React contexts
-    hooks/        ← Custom hooks
-    lib/trpc.ts   ← tRPC client
-    App.tsx       ← Routes & layout
-    main.tsx      ← Providers
-    index.css     ← global style
-drizzle/          ← Schema & migrations
-server/
-  db.ts           ← Query helpers
-  routers.ts      ← tRPC procedures
-storage/          ← S3 helpers
-shared/           ← Shared constants & types
+
+#### Option B — Manual Node.js
+
+```bash
+# Build for production
+pnpm build
+
+# Start the production server
+NODE_ENV=production node dist/index.js
 ```
 
-Only touch the files under "←" markers. Anything under `server/_core` or other tooling directories is framework-level—avoid editing unless you are extending the infrastructure.
+#### Option C — Kubernetes / k3s (Hospital cluster)
 
-### ⚠️ Handling Images & Media
+A `k8s/` directory with Helm charts and deployment manifests is available for hospital-grade deployments. Refer to the [Technical Documentation](./docs/TECHNICAL.md) for the full Kubernetes deployment guide.
 
-**DO NOT** store images, videos, or large assets in `client/public/` or `client/src/assets/`. Local media files will cause deployment timeouts.
+### Reverse Proxy (Nginx)
 
-**Required workflow:**
-1. Upload assets using the CLI: `manus-upload-file --webdev path/to/image.png`
-2. Use the returned storage path directly in your code: `<img src="/manus-storage/image_a1b2c3d4.png" />`
-3. Store the original local file in `/home/ubuntu/webdev-static-assets/` (outside the project directory)
+```nginx
+server {
+    listen 443 ssl;
+    server_name mci.your-hospital.gov.kw;
 
-Only small configuration files like `favicon.ico`, `robots.txt`, and `manifest.json` belong in `client/public/`.
+    ssl_certificate     /etc/ssl/certs/mci.crt;
+    ssl_certificate_key /etc/ssl/private/mci.key;
 
-Files in `client/public` are available at the root of your site—reference them with absolute paths (`/robots.txt`, etc.) from HTML templates, JSX, or meta tags.
-
----
-
-## Authentication Flow
-
-- Manus OAuth completes at `/api/oauth/callback` and drops a session cookie.
-- Each request to `/api/trpc` builds context via `server/_core/context.ts`, making the current user available as `ctx.user`.
-- Wrap protected logic in `protectedProcedure`; public access uses `publicProcedure`.
-- Frontend reads auth state with `trpc.auth.me.useQuery()` and invokes `trpc.auth.logout.useMutation()`—no cookie plumbing required.
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
 
 ---
 
 ## Environment Variables
 
-Available pre-defined system envs:
-- `DATABASE_URL`: MySQL/TiDB connection string
-- `JWT_SECRET`: Session cookie signing secret
-- `VITE_APP_ID`: Manus OAuth application ID
-- `OAUTH_SERVER_URL`: Manus OAuth backend base URL
-- `VITE_OAUTH_PORTAL_URL`: Manus login portal URL (frontend)
-- `OWNER_OPEN_ID`, `OWNER_NAME`: Owner's info
-- `BUILT_IN_FORGE_API_URL`: Manus built-in apis (includes llm, storage, data_api, notification, etc...)
-- `BUILT_IN_FORGE_API_KEY`: Bearer token used by Manus built-in apis (server-side)
-- `VITE_FRONTEND_FORGE_API_KEY`: Bearer token for frontend access to Manus built-in apis
-- `VITE_FRONTEND_FORGE_API_URL`: Manus built-in apis URL for frontend
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | Yes | MySQL connection string: `mysql://user:pass@host:port/db` |
+| `JWT_SECRET` | Yes | Secret key for session cookie signing (min 32 chars) |
+| `VITE_APP_ID` | Yes | Manus OAuth application ID |
+| `OAUTH_SERVER_URL` | Yes | Manus OAuth backend base URL |
+| `VITE_OAUTH_PORTAL_URL` | Yes | Manus login portal URL (frontend) |
+| `BUILT_IN_FORGE_API_KEY` | Yes | Manus built-in API bearer token (server-side) |
+| `BUILT_IN_FORGE_API_URL` | Yes | Manus built-in API base URL |
+| `VITE_FRONTEND_FORGE_API_KEY` | Yes | Frontend access token for Manus APIs |
+| `VITE_FRONTEND_FORGE_API_URL` | Yes | Frontend Manus API URL |
+| `OWNER_OPEN_ID` | Yes | OpenID of the platform owner (auto-assigned superadmin) |
+| `OWNER_NAME` | No | Display name of the platform owner |
 
-Do not edit these directly in code or commit `.env` files.
-The envs above are system envs, when use env in website code, refer `server/_core/env.ts` for available list.
-
----
-
-## Frontend Workflow
-
-1. Choose a design style before you write any frontend code according to Design Guide (color, font, shadow, art style). Remember to edit `client/src/index.css` for global theming and add needed font using google font cdn in `client/index.html`.
-2. Design the layout and navigation structure based on app purpose. Establish navigation in App.tsx accordingly:
-  - **Personal tools & internal dashboards** (finance trackers, task managers, admin panels, personal finance apps, analytics): Use DashboardLayout with sidebar navigation for consistent experience.
-  - **Public-facing products** (marketing sites, e-commerce, communities): Design custom navigation (top nav, contextual nav) and landing page to attract users.
-3. Start by updating `client/src/pages/Home.tsx` (the landing page shell) using shadcn/ui components to introduce links, CTAs, or feature entry points. 
-4. Create or update additional components under `client/src/pages/FeatureName.tsx`, continuing to leverage shadcn/ui + Tailwind for consistent styling.
-5. Register the route (or navigation entry) in `client/src/App.tsx`.
-6. Read data with `const { data, isLoading } = trpc.feature.useQuery(params);`.
-7. Mutate data with `trpc.feature.useMutation()`. Use optimistic updates for list operations, toggles, and profile edits. For critical operations (payments, auth), use `invalidate` with loading states.
-8. Use `useAuth()` for current user state, login URL from `getLoginUrl()`, and avoid direct cookie handling.
-9. Handle loading/empty/error states in the UI—tRPC already surfaces typed responses and errors.
+> **Security note:** Never commit `.env` files to version control. Use a secrets manager (AWS Secrets Manager, Azure Key Vault, HashiCorp Vault) in production deployments.
 
 ---
 
-## Frontend Development Guidelines
+## Database Setup
 
-**tRPC & Data Management:**
-- Use `trpc.*.useQuery/useMutation` for all backend calls—never introduce Axios/fetch wrappers.
-- **Use optimistic updates for instant feedback**: ideal for adding/editing/deleting list items, toggling states, updating profiles. Use `onMutate` to update cache, `onError` to rollback (The onMutate/onError/onSettled pattern). For critical operations (payments, auth), prefer `invalidate` with explicit loading states.
-- When using `invalidate` as fallback: call `trpc.useUtils().feature.invalidate()` in mutation's `onSuccess`.
-- Auth state comes from `useAuth()`; do not manipulate cookies manually.
+The platform uses **Drizzle ORM** with MySQL. The schema defines 15 tables:
 
-**UI & Styling:**
-- Prefer shadcn/ui components for interactions to keep a modern, consistent look; import from `@/components/ui/*` (e.g., `button`, `card`, `dialog`).
-- Compose Tailwind utilities with component variants for layout and states; avoid excessive custom CSS. Use built-in `variant`, `size`, etc. where available.
-- Preserve design tokens: keep the `@layer base` rules in `client/src/index.css`. Utilities like `border-border` and `font-sans` depend on them.
-- Consistent design language: use spacing, radius, shadows, and typography via tokens. Extract shared UI into `components/` for reuse instead of copy‑paste.
-- Accessibility and responsiveness: keep visible focus rings and ensure keyboard reachability; design mobile‑first with thoughtful breakpoints.
-- Theming: Choose dark/light theme to start with for ThemeProvider according to your design style (dark or light bg), then manage colors pallette with CSS variables in `client/src/index.css` instead of hard‑coding to keep global consistency.
-- Micro‑interactions and empty states: add motion, empty states, and icons tastefully to improve quality without distracting from content.
-- Navigation: For internal tools/admin panels, use persistent sidebar. For public-facing apps, design navigation based on content structure (top nav, side nav, or contextual)—ensure clear escape routes from all pages.
-- Placeholder UI elements: When adding structural placeholders (nav items, table actions) for not-yet-implemented features, show toast on click ("Feature coming soon"). Inform user which elements are placeholders when presenting work.
+`users`, `facilities`, `incidents`, `casualties`, `casualty_events`, `triage_assessments`, `or_cases`, `resources`, `transports`, `ics_forms`, `emt_mds_reports`, `comms_messages`, `audit_logs`, `invitations`, `access_requests`
 
-**React Best Practices:**
-- Never call setState/navigation in render phase → wrap in `useEffect`
+To apply the schema to a fresh database:
 
-**Customized Defaults:**
-This template customizes some Tailwind/shadcn defaults for simplified usage:
-- `.container` is customized to auto-center and add responsive padding (see `index.css`). Use directly without `mx-auto`/`px-*`. For custom widths, use `max-w-*` with `mx-auto px-4`.
-- `.flex` is customized to have `min-width:0` and `min-height:0` by default
-- `button` variant `outline` uses transparent background (not `bg-background`). Add bg color class manually if needed.
+```bash
+# Generate migration SQL from the schema
+pnpm drizzle-kit generate
+
+# Review the generated SQL in drizzle/
+# Then apply it to your database using your preferred MySQL client or:
+pnpm drizzle-kit migrate
+```
+
+For schema changes, always follow the **expand/contract pattern** — add new columns before removing old ones to maintain backward compatibility during rolling deployments.
 
 ---
 
-## 🎨 Design Guide
+## User Access & Invitations
 
-When generating frontend UI, avoid generic patterns that lack visual distinction:
-- Avoid generic full-page centered layouts—prefer asymmetric/sidebar/grid structures for landing pages and dashboards
-- Avoid applying dashboard/sidebar patterns to public-facing apps (forums, communities, e-commerce)—reserve those for internal tools
-- When user provides vague requirements, make creative design decisions (choose specific color palette, typography, layout approach)
-- Prioritize visual diversity: combine different design systems (e.g., one color scheme + different typography + another layout principle)
-- For landing pages: prefer asymmetric layouts, specific color values (not just "blue"), and textured backgrounds over flat colors
-- For dashboards: use defined spacing systems, soft shadows over borders, and accent colors for hierarchy
+This platform uses an **invite-only access model**. There is no public registration.
 
----
+### Inviting a New User
 
-## Animation Guide
+1. Sign in as an **Admin** or **Super Admin**
+2. Navigate to **Admin → Invitations**
+3. Click **Send Invitation**, enter the recipient's email, assign their role and optionally a facility
+4. Copy the generated invite link and share it with the recipient
+5. The link expires after **7 days**; use **Resend** to extend it
 
-Bake motion taste in from the first line of code. Snappy, physically intuitive interactions are not a polish pass — they are part of the initial build.
-- Decide whether to animate at all: keyboard-initiated actions (command palettes, shortcuts) must be instant — never animate them. High-frequency interactions (hover, list nav) should be minimal. Reserve richer motion for occasional events (modals, drawers, toasts) and rare delight moments (onboarding).
-- Keep UI animations under 300ms. A 180ms dropdown feels significantly better than a 400ms one. Typical ranges: button press 100–160ms, tooltips 125–200ms, dropdowns 150–250ms, modals/drawers 200–500ms.
-- Use strong custom easings, not the weak CSS defaults. Default to a snappy ease-out for entering/exiting UI: `--ease-out: cubic-bezier(0.23, 1, 0.32, 1);`. For moving/morphing use `--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);`. NEVER use `ease-in` for UI animations — it feels sluggish.
-- Buttons must feel responsive: add `transform: scale(0.97)` on `:active` with a ~160ms ease-out transition so the UI confirms it heard the user.
-- Never animate from `scale(0)` — nothing in the real world appears from nothing. Start from `scale(0.95)` combined with `opacity: 0`.
-- Origin-aware popovers/dropdowns: scale in from the trigger point (e.g. `transform-origin: var(--radix-popover-content-transform-origin)`). Modals are the exception and stay centered.
-- Prefer CSS transitions over @keyframes for dynamic UI state. Transitions can be interrupted and reversed smoothly mid-flight; keyframes restart from zero and feel broken when interrupted.
-- Only animate `transform` and `opacity` for motion — they run on the GPU and skip layout/paint. Avoid animating `width`, `height`, `padding`, `margin`, `top/left` unless absolutely necessary.
-- Stagger grouped entrances by 30–80ms per item to create a cascading reveal instead of a wall of motion.
-- Asymmetric timing for deliberate actions: hold-to-confirm should be slow and linear on press (e.g. 2s linear), but release/cancel should snap back fast (~200ms ease-out).
-- Respect `prefers-reduced-motion`: gate non-essential motion behind `@media (prefers-reduced-motion: no-preference)`.
+### Handling Access Requests
+
+Hospital staff who do not have an invite can submit a **Request Access** form from the landing page. Submitted requests appear in **Admin → Access Requests** with a badge counter. From there, you can send an invitation directly or reject the request.
+
+### First-Time Login Flow
+
+When a recipient clicks their invite link, they are shown a preview of their assigned role and the name of who invited them. They click **Accept Invitation** and authenticate via Manus OAuth. Their role is applied automatically upon successful authentication.
 
 ---
 
-## Feature Checklist
+## Role Reference
 
-- [ ] Tables updated in `drizzle/schema.ts`, migrations pushed (`pnpm db:push`)
-- [ ] Query helper added in `server/db.ts` (returns raw Drizzle rows)
-- [ ] Procedure created in `server/routers.ts` (choose `public` vs `protected`)
-- [ ] UI calls the procedure via `trpc.*.useQuery/useMutation`
-- [ ] Success + error paths verified in the browser
-
----
-
-## Pre-built Components
-
-Before implementing UI features, check if these components already exist:
-
-Dashboard & Layout:
-- `client/src/components/DashboardLayout.tsx` - Full dashboard layout with sidebar navigation, auth handling, and user profile. Use this for any admin panel or dashboard-style app instead of building from scratch.
-- `client/src/components/DashboardLayoutSkeleton.tsx` - Loading skeleton for dashboard during auth checks
-
-Chat & Messaging:
-- `client/src/components/AIChatBox.tsx` - Full-featured chat interface with message history, streaming support, and markdown rendering. Use this for any chat/conversation UI instead of building from scratch.
-
-Maps:
-- `client/src/components/Map.tsx` - Google Maps integration with proxy authentication. Provides MapView component with onMapReady callback for initializing Google Maps services (Places, Geocoder, Directions, Drawing, etc.). All map functionality works directly in the browser.
-
-When implementing features that match these categories, MUST evaluate the component first to decide whether to use or customize it.
+| Role | Key Permissions |
+|---|---|
+| **Super Admin** | Full system access; manages all users, facilities, and platform settings |
+| **Admin** | User management, invitations, facility management, audit log access |
+| **Incident Commander** | Create and manage incidents; access all operational modules |
+| **Clinician** | Patient tracking, triage, OR queue, communications |
+| **Triage Officer** | Scene triage, casualty registration, triage reassessment |
+| **Logistics** | Resources, transport, supply requests, EMT MDS reporting |
+| **Viewer** | Read-only access to dashboards and incident boards |
 
 ---
 
-## Internal Tools & Admin Panels
+## Standards Compliance
 
-For certain app types, this template provides DashboardLayout—a standardized sidebar pattern.
-
-**Use DashboardLayout for:**
-- Admin/management dashboards
-- Personal productivity apps (task managers, note-taking)
-- Analytics/monitoring tools
-
-**Do NOT use for:**
-- Public content platforms (forums, blogs, social networks)
-- E-commerce storefronts
-- Marketing/landing sites
-
-**Layout & Navigation**
-- Use `DashboardLayout` component from `client/src/components/DashboardLayout.tsx` and remove any page-level headers to avoid duplication.
-- When use DashboardLayout, read its content before making changes and preserve its core structure by default.
-
-**Role-based Access Control**
-When building apps with distinct access levels (e.g., e-commerce with public home, user account, admin panel):
-- The `user` table includes a `role` field (enum: `admin` | `user`) for identity separation
-- Use `ctx.user.role` in procedures to gate admin-only operations
-- Wrap admin-only backend logic in `adminProcedure`
-- Frontend can conditionally render navigation/routes based on `useAuth().user?.role`
-
-Example procedure pattern:
-```ts
-adminOnlyProcedure: protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN' });
-  return next({ ctx });
-}),
-```
-
-**Managing Admins**
-- To promote a user to admin, update the `role` field directly in the database via the system UI or SQL
-- If you need additional roles beyond `admin`/`user`, extend the enum in `drizzle/schema.ts` and push the migration
+| Standard | Application |
+|---|---|
+| **SALT** | Default adult triage algorithm (CHEMM/HHS) |
+| **START** | Alternative adult triage algorithm |
+| **JumpSTART** | Paediatric triage algorithm (age ≤ 8) |
+| **HICS** | Incident command structure, Job Action Sheets, ICS forms 201–254 |
+| **CO-S-TR** | Hospital command dashboard organising principle (ASPR TRACIE) |
+| **WHO EMT MDS** | 85-item daily situation report for deployed EMT teams |
+| **HL7 FHIR R4/R5** | FHIR-aligned data models for interoperability with national EHRs |
+| **NDMS / ESF-8** | Inter-facility patient movement schema |
+| **HIPAA / GDPR / Kuwait DPPL** | Data minimisation, audit logging, RBAC, breach response |
 
 ---
 
-## LLM Integration
+## License
 
-Use the preconfigured LLM helpers. Credentials are injected from the platform (no manual setup required).
+This project is licensed under the **MIT License**.
 
-```ts
-import { invokeLLM } from "./server/_core/llm";
-
-/**
- * Simple chat completion
- * type Role = "system" | "user" | "assistant" | "tool" | "function";
- * type TextContent = {
- *   type: "text";
- *   text: string;
- * };
- *
- * type ImageContent = {
- *   type: "image_url";
- *   image_url: {
- *     url: string;
- *     detail?: "auto" | "low" | "high";
- *   };
- * };
- *
- * type FileContent = {
- *   type: "file_url";
- *   file_url: {
- *     url: string;
- *     mime_type?: "audio/mpeg" | "audio/wav" | "application/pdf" | "audio/mp4" | "video/mp4" ;
- *   };
- * };
- *
- * export type Message = {
- *   role: Role;
- *   content: string | Array<ImageContent | TextContent | FileContent>
- * };
- *
- * Supported parameters:
- * messages: Array<{
- *   role: 'system' | 'user' | 'assistant' | 'tool',
- *   content: string | { tool_call: { name: string, arguments: string } }
- * }>
- * tool_choice?: 'none' | 'auto' | 'required' | { type: 'function', function: { name: string } }
- * tools?: Tool[]
- */
-const response = await invokeLLM({
-  messages: [
-    { role: "system", content: "You are a helpful assistant." },
-    { role: "user", content: "Hello, world!" },
-  ],
-});
 ```
+MIT License
 
-Tips
-- Always call llm functions from server-side code (e.g., inside tRPC procedures), to avoid exposing your API key.
-- LLM calls deduct from this project's credit balance.
-- All models support streaming, but `invokeLLM()` doesn't expose `stream` — modify the helper to pass `stream: true` and parse the SSE response if you need it. When proxying SSE, listen on `res` close (not `req`) and guard with a `finished` flag, or the upstream gets aborted after the first event.
-- LLM responses often contain markdown. Use `<Streamdown>{content}</Streamdown>` (imported from `streamdown`) to render markdown content with proper formatting and streaming support.
+Copyright (c) 2026 Saud Naji Alzaid
 
-### Listing Available Models
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-```ts
-import { listLLMModels } from "./server/_core/llm";
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-const { data } = await listLLMModels();
-const ids = data.map(m => m.id);
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 ```
-
-Returns OpenAI-standard model metadata for each available ID. From the project shell you can also peek at it directly: `curl "$BUILT_IN_FORGE_API_URL/v1/models" -H "Authorization: Bearer $BUILT_IN_FORGE_API_KEY"`.
-
-**Combine with `invokeLLM`** to discover IDs at runtime instead of hardcoding:
-
-```ts
-import { invokeLLM, listLLMModels } from "./server/_core/llm";
-
-const { data } = await listLLMModels();
-const model = data.find(m => m.id.startsWith("claude-"))?.id;
-
-const response = await invokeLLM({
-  model,
-  messages: [{ role: "user", content: "Hello" }],
-});
-```
-
-### Thinking / Reasoning
-
-`invokeLLM()` forwards `thinking` and `reasoning` extension params unchanged (no defaults). Per model family:
-
-- OpenAI gpt-5 family — `reasoning: { effort: "minimal" | "low" | "medium" | "high" }`
-- Anthropic claude family — `thinking: { type: "enabled", budget_tokens: 2048 }`
-- Google gemini family — `thinking: { budget_tokens: 1024 }`
-
-```ts
-await invokeLLM({
-  model: "claude-sonnet-4-6",
-  messages: [...],
-  thinking: { type: "enabled", budget_tokens: 2048 },
-});
-
-await invokeLLM({
-  model: "gpt-5",
-  messages: [...],
-  reasoning: { effort: "low" },
-});
-```
-
-For the exact shape per model, check `capabilities.thinking_example` from the `/models` catalog (see Tips above).
-
-### Structured Responses (JSON Schema)
-
-Ask the model to return structured JSON via `response_format`:
-
-```ts
-import { invokeLLM } from "./server/_core/llm";
-
-const structured = await invokeLLM({
-  messages: [
-    { role: "system", content: "You are a helpful assistant designed to output JSON." },
-    { role: "user", content: "Extract the name and age from the following text: \"My name is Alice and I am 30 years old.\"" },
-  ],
-  response_format: {
-    type: "json_schema",
-    json_schema: {
-      name: "person_info",
-      strict: true,
-      schema: {
-        type: "object",
-        properties: {
-          name: { type: "string", description: "The name of the person" },
-          age: { type: "integer", description: "The age of the person" },
-        },
-        required: ["name", "age"],
-        additionalProperties: false,
-      },
-    },
-  },
-});
-
-// The model responds with JSON content matching the schema.
-// Access via `structured.choices[0].message.content` and JSON.parse if needed.
-```
-The helpers mirror the Python SDK semantics but produce JavaScript-first code, keeping credentials inside the server and ensuring every environment has access to the same token.
 
 ---
 
-## Voice Transcription Integration
+## Credits & Acknowledgements
 
-Use the preconfigured voice transcription helper that converts speech to text using Whisper API, no manual setup required.
+**Platform Owner & Architect:** Saud Naji Alzaid
 
-Example usage:
-```ts
-import { transcribeAudio } from "./server/_core/voiceTranscription";
+This platform was designed and built to serve the Kuwait Ministry of Health and its affiliated hospital network. The clinical decision logic, triage algorithms, and operational workflows are based on the following internationally recognised standards and publications:
 
-const result = await transcribeAudio({
-  audioUrl: "https://storage.example.com/audio/recording.mp3",
-  language: "en", // Optional: helps improve accuracy
-  prompt: "Transcribe meeting notes" // Optional: context hint
-});
+- ASPR TRACIE — Hospital Mass Casualty Response Plan Considerations and CO-S-TR Model
+- California Hospital Association — Hospital Incident Command System (HICS)
+- CHEMM/HHS — SALT and JumpSTART Mass Casualty Triage Algorithms
+- WHO Kobe Centre — Emergency Medical Team Minimum Data Set
+- HL7 International — FHIR R4/R5 Specification
+- Utah DHHS — ESF-8 Appendix 1, Federal Emergency Support Function 8
 
-// Returns native Whisper API response
-// result.text - Full transcription
-// result.language - Detected language (ISO-639-1)
-// result.segments - Timestamped segments with metadata
-```
-
-Tips
-- Accepts URL to pre-uploaded audio file
-- 16MB file size limit enforced during transcription, size flag to be set by frontend
-- Supported formats: webm, mp3, wav, ogg, m4a
-- Returns native Whisper API response with rich metadata
-- Frontend should handle audio capture, storage upload, and size validation
+**Built with:** React, TypeScript, tRPC, Drizzle ORM, Tailwind CSS, shadcn/ui, and the Manus platform.
 
 ---
 
-## Image Generation Integration
-
-Use the preconfigured image generation helper that connects to the internal ImageService, no manual setup required.
-
-Example usage:
-```ts
-import { generateImage } from "./server/_core/imageGeneration.ts";
-
-const { url: imageUrl } = await generateImage({
-  prompt: "A serene landscape with mountains"
-});
-// For editing:
-const { url: imageUrl } = await generateImage({
-  prompt: "Add a rainbow to this landscape",
-  originalImages: [{
-    url: "https://example.com/original.jpg",
-    mimeType: "image/jpeg"
-  }]
-});
-```
-
-Tips
-- Always call from server-side code (e.g., inside tRPC procedures) to avoid exposing API keys
-- Image generation can take 5-20 seconds, implement proper loading states
-- Implement proper error handling as image generation can fail
-
----
-
-## ☁️ File Storage
-
-Use the preconfigured storage helpers in `server/storage.ts`. Credentials are injected from the platform (no manual setup required). Files are stored securely and served via the built-in `/manus-storage/` path — no manual URL management needed.
-
-```ts
-import { storagePut } from "./server/storage";
-
-// Upload bytes to storage
-const fileKey = `${userId}-files/${fileName}.png`
-const { key, url } = await storagePut(
-  fileKey,
-  fileBuffer, // Buffer | Uint8Array | string
-  "image/png"
-);
-// url = "/manus-storage/{key}" — use directly in frontend code
-// key = unique storage key — save in database
-```
-
-Tips
-- Save the `key` or `url` in your database; use storage for the actual file bytes. This applies to all files including images, documents, and media.
-- For file uploads, have the client POST to your server, then call `storagePut` from your backend.
-- The returned `url` (e.g. `/manus-storage/...`) is automatically served via signed redirect — no manual URL signing needed.
-- To delete a file, drop its `key` from your DB and any UI references — the key is the only way to reach the object, so an unreferenced file is effectively gone. Do not implement a helper to remove the underlying object; the template's storage layer does not expose a delete endpoint.
-
----
-
-## 🗺️ Maps Integration
-
-**CRITICAL: The Manus proxy provides FULL access to ALL Google Maps features** - including advanced drawing, heatmaps, Street View, all layers, Places API, etc. Do ask users for Google Map API keys - authentication is automatic.
-
-**Default: Use Frontend SDK** - Import MapView from `client/src/components/Map.tsx` and initialize ANY Google Maps service (geocoding, directions, places, drawing, visualization, geometry, etc.) in the onMapReady callback. 
-
-**Use Backend API only when:**
-- Persisting data (save routes/locations to database)
-- Bulk operations (1000+ addresses)
-- Server-side needs (caching, scheduled jobs, hiding business logic)
-
-**Implementation:**
-- Frontend: See `client/src/components/Map.tsx` for component usage - ALL Google Maps JavaScript API features work
-- Backend: Create tRPC procedures using `makeRequest` from `server/_core/map.ts`
-
-NEVER use external map libraries or request API keys from users - the Manus proxy handles everything automatically with no feature limitations.
-
-
----
-
-## ☁️ Data API
-
-When you need external data, use the omni_search with search_type = 'api' to see there's any built-in api available in Manus API Hub access. You only have to connect other api if there's no suitable built-in api available.
-
----
-
-## Owner Notifications
-
-This template already ships with a `notifyOwner({ title, content })` helper (`server/_core/notification.ts`) and a protected tRPC mutation at `trpc.system.notifyOwner`. Use it whenever backend logic needs to push an operational update to the Manus project owner—common triggers are new form submissions, survey feedback, or workflow results.
-
-1. On the server, call `await notifyOwner({ title, content })` or reuse the provided `system.notifyOwner` mutation from jobs/webhooks (`trpc.system.notifyOwner.useMutation()` on the client).
-2. Handle the boolean return (`true` on success, `false` if the upstream service is temporarily unavailable) to decide whether you need a fallback channel.
-
-Keep this channel for owner-facing alerts; end-user messaging should flow through your app-specific systems.
-
----
-
-## ⏱ Datetime & Timezone
-
-Persistence: Store all business timestamps as UTC-based Unix timestamps (milliseconds since epoch) at the database and API layer. Do not store client-local, timezone-dependent, or string-based timestamps unless explicitly required as separate fields.
-Frontend display: In React components, always convert UTC timestamps to the user’s local timezone for display e.g. new Date(utcTimestamp).toLocaleString(). Keep all internal state and API interactions in UTC timestamps to avoid drift and confusion.
-
----
-
-## Tips
-
-- Keep router files under ~150 lines—split into `server/routers/<feature>.ts` once they grow.
-- Show loading states at component level (spinners, skeletons) rather than blocking entire pages—keeps the app feeling responsive.
-
----
-
-## Core File References
-
-Note: All TODO comments are remarks for the agent (you), not for the user.
-
-`package.json`
-```ts
-{
-  "name": "mci-platform",
-  "version": "1.0.0",
-  "type": "module",
-  "license": "MIT",
-  "scripts": {
-    "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
-    "build": "vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
-    "start": "NODE_ENV=production node dist/index.js",
-    "check": "tsc --noEmit",
-    "format": "prettier --write .",
-    "test": "vitest run",
-    "db:push": "drizzle-kit generate && drizzle-kit migrate"
-  },
-  "dependencies": {
-    "@aws-sdk/client-s3": "^3.693.0",
-    "@aws-sdk/s3-request-presigner": "^3.693.0",
-    "@hookform/resolvers": "^5.2.2",
-    "@radix-ui/react-accordion": "^1.2.12",
-    "@radix-ui/react-alert-dialog": "^1.1.15",
-    "@radix-ui/react-aspect-ratio": "^1.1.7",
-    "@radix-ui/react-avatar": "^1.1.10",
-    "@radix-ui/react-checkbox": "^1.3.3",
-    "@radix-ui/react-collapsible": "^1.1.12",
-    "@radix-ui/react-context-menu": "^2.2.16",
-    "@radix-ui/react-dialog": "^1.1.15",
-    "@radix-ui/react-dropdown-menu": "^2.1.16",
-    "@radix-ui/react-hover-card": "^1.1.15",
-    "@radix-ui/react-label": "^2.1.7",
-    "@radix-ui/react-menubar": "^1.1.16",
-    "@radix-ui/react-navigation-menu": "^1.2.14",
-    "@radix-ui/react-popover": "^1.1.15",
-    "@radix-ui/react-progress": "^1.1.7",
-    "@radix-ui/react-radio-group": "^1.3.8",
-    "@radix-ui/react-scroll-area": "^1.2.10",
-    "@radix-ui/react-select": "^2.2.6",
-    "@radix-ui/react-separator": "^1.1.7",
-    "@radix-ui/react-slider": "^1.3.6",
-    "@radix-ui/react-slot": "^1.2.3",
-    "@radix-ui/react-switch": "^1.2.6",
-    "@radix-ui/react-tabs": "^1.1.13",
-    "@radix-ui/react-toggle": "^1.1.10",
-    "@radix-ui/react-toggle-group": "^1.1.11",
-    "@radix-ui/react-tooltip": "^1.2.8",
-    "@tanstack/react-query": "^5.90.2",
-    "@trpc/client": "^11.6.0",
-    "@trpc/react-query": "^11.6.0",
-    "@trpc/server": "^11.6.0",
-    "axios": "^1.12.0",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "cmdk": "^1.1.1",
-    "cookie": "^1.0.2",
-    "date-fns": "^4.1.0",
-    "dotenv": "^17.2.2",
-    "drizzle-orm": "^0.44.5",
-    "embla-carousel-react": "^8.6.0",
-    "express": "^4.21.2",
-    "framer-motion": "^12.23.22",
-    "input-otp": "^1.4.2",
-    "jose": "6.1.0",
-    "lucide-react": "^0.453.0",
-    "mysql2": "^3.15.0",
-    "nanoid": "^5.1.5",
-    "next-themes": "^0.4.6",
-    "react": "^19.2.1",
-    "react-day-picker": "^9.11.1",
-    "react-dom": "^19.2.1",
-    "react-hook-form": "^7.64.0",
-    "react-resizable-panels": "^3.0.6",
-    "recharts": "^2.15.2",
-    "sonner": "^2.0.7",
-    "streamdown": "^1.4.0",
-    "superjson": "^1.13.3",
-    "tailwind-merge": "^3.3.1",
-    "tailwindcss-animate": "^1.0.7",
-    "vaul": "^1.1.2",
-    "wouter": "^3.3.5",
-    "zod": "^4.1.12"
-  },
-  "devDependencies": {
-    "@builder.io/vite-plugin-jsx-loc": "^0.1.1",
-    "@tailwindcss/typography": "^0.5.15",
-    "@tailwindcss/vite": "^4.1.3",
-    "@types/express": "4.17.21",
-    "@types/google.maps": "^3.58.1",
-    "@types/node": "^24.7.0",
-    "@types/react": "^19.2.1",
-    "@types/react-dom": "^19.2.1",
-    "@vitejs/plugin-react": "^5.0.4",
-    "add": "^2.0.6",
-    "autoprefixer": "^10.4.20",
-    "drizzle-kit": "^0.31.4",
-    "esbuild": "^0.25.0",
-    "pnpm": "^10.15.1",
-    "postcss": "^8.4.47",
-    "prettier": "^3.6.2",
-    "tailwindcss": "^4.1.14",
-    "tsx": "^4.19.1",
-    "tw-animate-css": "^1.4.0",
-    "typescript": "5.9.3",
-    "vite": "^7.1.7",
-    "vite-plugin-manus-runtime": "^0.0.57",
-    "vitest": "^2.1.4"
-  },
-  "packageManager": "pnpm@10.4.1+sha512.c753b6c3ad7afa13af388fa6d808035a008e30ea9993f58c6663e2bc5ff21679aa834db094987129aa4d488b86df57f7b634981b2f827cdcacc698cc0cfb88af",
-  "pnpm": {
-    "patchedDependencies": {
-      "wouter@3.7.1": "patches/wouter@3.7.1.patch"
-    },
-    "overrides": {
-      "tailwindcss>nanoid": "3.3.7"
-    }
-  }
-}
-```
-
-`drizzle/schema.ts`
-```ts
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
-
-/**
- * Core user table backing auth flow.
- * Extend this file with additional tables as your product grows.
- * Columns use camelCase to match both database fields and generated types.
- */
-export const users = mysqlTable("users", {
-  /**
-   * Surrogate primary key. Auto-incremented numeric value managed by the database.
-   * Use this for relations between tables.
-   */
-  id: int("id").autoincrement().primaryKey(),
-  /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
-  openId: varchar("openId", { length: 64 }).notNull().unique(),
-  name: text("name"),
-  email: varchar("email", { length: 320 }),
-  loginMethod: varchar("loginMethod", { length: 64 }),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-  lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
-});
-
-export type User = typeof users.$inferSelect;
-export type InsertUser = typeof users.$inferInsert;
-
-// TODO: Add your tables here
-```
-
-`server/db.ts`
-```ts
-import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
-import { ENV } from './_core/env';
-
-let _db: ReturnType<typeof drizzle> | null = null;
-
-// Lazily create the drizzle instance so local tooling can run without a DB.
-export async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
-    try {
-      _db = drizzle(process.env.DATABASE_URL);
-    } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
-      _db = null;
-    }
-  }
-  return _db;
-}
-
-export async function upsertUser(user: InsertUser): Promise<void> {
-  if (!user.openId) {
-    throw new Error("User openId is required for upsert");
-  }
-
-  const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot upsert user: database not available");
-    return;
-  }
-
-  try {
-    const values: InsertUser = {
-      openId: user.openId,
-    };
-    const updateSet: Record<string, unknown> = {};
-
-    const textFields = ["name", "email", "loginMethod"] as const;
-    type TextField = (typeof textFields)[number];
-
-    const assignNullable = (field: TextField) => {
-      const value = user[field];
-      if (value === undefined) return;
-      const normalized = value ?? null;
-      values[field] = normalized;
-      updateSet[field] = normalized;
-    };
-
-    textFields.forEach(assignNullable);
-
-    if (user.lastSignedIn !== undefined) {
-      values.lastSignedIn = user.lastSignedIn;
-      updateSet.lastSignedIn = user.lastSignedIn;
-    }
-    if (user.role !== undefined) {
-      values.role = user.role;
-      updateSet.role = user.role;
-    } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
-    }
-
-    if (!values.lastSignedIn) {
-      values.lastSignedIn = new Date();
-    }
-
-    if (Object.keys(updateSet).length === 0) {
-      updateSet.lastSignedIn = new Date();
-    }
-
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
-      set: updateSet,
-    });
-  } catch (error) {
-    console.error("[Database] Failed to upsert user:", error);
-    throw error;
-  }
-}
-
-export async function getUserByOpenId(openId: string) {
-  const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot get user: database not available");
-    return undefined;
-  }
-
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
-
-  return result.length > 0 ? result[0] : undefined;
-}
-
-// TODO: add feature queries here as your schema grows.
-```
-
-`server/routers.ts`
-```ts
-import { COOKIE_NAME } from "@shared/const";
-import { getSessionCookieOptions } from "./_core/cookies";
-import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
-
-export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
-  system: systemRouter,
-  auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
-    logout: publicProcedure.mutation(({ ctx }) => {
-      const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return {
-        success: true,
-      } as const;
-    }),
-  }),
-
-  // TODO: add feature routers here, e.g.
-  // todo: router({
-  //   list: protectedProcedure.query(({ ctx }) =>
-  //     db.getUserTodos(ctx.user.id)
-  //   ),
-  // }),
-});
-
-export type AppRouter = typeof appRouter;
-```
-
-`client/src/App.tsx`
-```tsx
-import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
-import ErrorBoundary from "./components/ErrorBoundary";
-import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
-
-function Router() {
-  // make sure to consider if you need authentication for certain routes
-  return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
-
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
-function App() {
-  return (
-    <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
-  );
-}
-
-export default App;
-```
-
-`client/src/lib/trpc.ts`
-```ts
-import { createTRPCReact } from "@trpc/react-query";
-import type { AppRouter } from "../../../server/routers";
-
-export const trpc = createTRPCReact<AppRouter>();
-```
-
-`client/src/pages/Home.tsx`
-```tsx
-import { useAuth } from "@/_core/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { getLoginUrl } from "@/const";
-import { Streamdown } from 'streamdown';
-
-/**
- * All content in this page are only for example, replace with your own feature implementation
- * When building pages, remember your instructions in Frontend Workflow, Frontend Best Practices, Design Guide and Common Pitfalls
- */
-export default function Home() {
-  // The userAuth hooks provides authentication state
-  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
-
-  // If theme is switchable in App.tsx, we can implement theme toggling like this:
-  // const { theme, toggleTheme } = useTheme();
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
-      </main>
-    </div>
-  );
-}
-```
-
-`server/auth.logout.test.ts`
-```ts
-import { describe, expect, it } from "vitest";
-import { appRouter } from "./routers";
-import { COOKIE_NAME } from "../shared/const";
-import type { TrpcContext } from "./_core/context";
-
-type CookieCall = {
-  name: string;
-  options: Record<string, unknown>;
-};
-
-type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
-
-function createAuthContext(): { ctx: TrpcContext; clearedCookies: CookieCall[] } {
-  const clearedCookies: CookieCall[] = [];
-
-  const user: AuthenticatedUser = {
-    id: 1,
-    openId: "sample-user",
-    email: "sample@example.com",
-    name: "Sample User",
-    loginMethod: "manus",
-    role: "user",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    lastSignedIn: new Date(),
-  };
-
-  const ctx: TrpcContext = {
-    user,
-    req: {
-      protocol: "https",
-      headers: {},
-    } as TrpcContext["req"],
-    res: {
-      clearCookie: (name: string, options: Record<string, unknown>) => {
-        clearedCookies.push({ name, options });
-      },
-    } as TrpcContext["res"],
-  };
-
-  return { ctx, clearedCookies };
-}
-
-describe("auth.logout", () => {
-  it("clears the session cookie and reports success", async () => {
-    const { ctx, clearedCookies } = createAuthContext();
-    const caller = appRouter.createCaller(ctx);
-
-    const result = await caller.auth.logout();
-
-    expect(result).toEqual({ success: true });
-    expect(clearedCookies).toHaveLength(1);
-    expect(clearedCookies[0]?.name).toBe(COOKIE_NAME);
-    expect(clearedCookies[0]?.options).toMatchObject({
-      maxAge: -1,
-      secure: true,
-      sameSite: "none",
-      httpOnly: true,
-      path: "/",
-    });
-  });
-});
-```
----
-
-## Common Pitfalls
-
-### Infinite loading loops from unstable references
-**Anti-pattern:** Creating new objects/arrays in render that are used as query inputs
-```tsx
-// ❌ Bad: New Date() creates new reference every render → infinite queries
-const { data } = trpc.items.getByDate.useQuery({
-  date: new Date(), // ← New object every render!
-});
-
-// ❌ Bad: Array/object literals in query input
-const { data } = trpc.items.getByIds.useQuery({
-  ids: [1, 2, 3], // ← New array reference every render!
-});
-```
-
-**Correct approach:** Stabilize references with useState/useMemo
-```tsx
-// ✅ Good: Initialize once with useState
-const [date] = useState(() => new Date());
-const { data } = trpc.items.getByDate.useQuery({ date });
-
-// ✅ Good: Memoize complex inputs
-const ids = useMemo(() => [1, 2, 3], []);
-const { data } = trpc.items.getByIds.useQuery({ ids });
-```
-
-**Why this happens:** TRPC queries trigger when input references change. Objects/arrays created in render have new references each time, causing infinite re-fetches.
-
-### Storing file bytes in database columns
-**Anti-pattern:** Adding BLOB/BYTEA columns to store file content
-```ts
-// ❌ Bad: Database bloat and slow queries
-export const files = sqliteTable('files', {
-  content: blob('content'), // Never store file bytes
-});
-```
-
-**Correct approach:** Store S3 reference only, upload file bytes to S3
-```ts
-// ✅ Good: Store metadata + S3 reference
-export const files = sqliteTable('files', {
-  url: text('url').notNull(), // Url to reference the file in s3
-  fileKey: text('file_key').notNull(), // also save file_key for clarity
-  // optional, save other metadata if needed
-  // filename: text('filename'),
-  // mimeType: text('mime_type'),
-});
-```
-
-Use `storagePut()` to upload files (see S3 File Storage section).
-
-### Navigation dead-ends in subpages
-**Problem:** Creating nested routes without escape routes—no header nav, no sidebar, no back button.
-
-**Root cause:** Implementing individual pages before establishing global layout structure.
-
-**Solution:** Define layout wrapper in App.tsx first, then build pages inside it. For admin tools use DashboardLayout; for detail pages add back button with `router.back()`.
-
-### Invisible text from theme/color mismatches
-
-**Root cause:** Semantic colors (`bg-background`, `text-foreground`) are CSS variables that resolve based on ThemeProvider's active theme. Mismatches cause invisible text.
-
-**Two critical rules:**
-
-1. **Match theme to CSS variables:** If `defaultTheme="dark"` in App.tsx, ensure `.dark {}` in index.css has dark background + light foreground values
-2. **Always pair bg with text:** When using `bg-{semantic}`, MUST also use `text-{semantic}-foreground` (not automatic - text inherits from parent otherwise)
-
-**Quick reference:**
-```tsx
-// ✅ Theme + CSS alignment
-<ThemeProvider defaultTheme="dark">  {/* Must match .dark in index.css */}
-  <div className="bg-background text-foreground">...</div>
-</ThemeProvider>
-
-// ✅ Required class pairs
-<div className="bg-popover text-popover-foreground">...</div>
-<div className="bg-card text-card-foreground">...</div>
-<div className="bg-accent text-accent-foreground">...</div>
-```
-
-### Nested anchor tags in Link components
-**Problem:** Wrapping `<a>` tags inside another `<a>` or wouter's `<Link>` creates nested anchors and runtime errors.
-
-**Solution:** Pass children directly to Link—it already renders an `<a>` internally.
-```tsx
-// ❌ Bad: <Link><a>...</a></Link> or <a><a>...</a></a>
-// ✅ Good: <Link>...</Link> or just <a>...</a>
-```
-
-### Empty `Select.Item` values
-**Rule:** Every `<Select.Item>` must have a non-empty `value` prop—never `""`, `undefined`, or omitted.
-
----
-
-## Manus OAuth Best Practices
-
-**Key Rule:** Always use `window.location.origin` for redirect URLs—never hardcode domains or use `req.host`. Frontend and backend run on separate servers, so the frontend must pass its origin explicitly.
-
-**Unsupported browsers:** Safari Private Browsing, Firefox Strict ETP, Brave Aggressive Shields, or any browser blocking cookies.
-
-**Anti-patterns:**
-```ts
-// ❌ Never construct URLs from env vars or patterns
-const url = `https://${projectName}.manus.space/callback`;
-const url = `https://${process.env.APP_SUBDOMAIN}.example.com/verify`;
-```
-
-**Correct approach:** This template already implements the pattern correctly:
-- `client/src/const.ts`: `getLoginUrl(returnPath?)` encodes origin + returnPath in state
-- `server/_core/oauth.ts`: `parseState()` extracts origin from state for redirects
-
-**For invite/magic links:** When backend generates URLs, frontend must pass origin in the request:
-```ts
-// Frontend
-const createInvite = trpc.invites.create.useMutation();
-await createInvite.mutateAsync({ eventId: "123", origin: window.location.origin });
-
-// Backend - use input.origin to build the URL
-const inviteUrl = `${input.origin}/events/${eventId}/join?token=${token}`;
-```
+*For support, deployment assistance, or to report a security vulnerability, contact the platform administrator.*
