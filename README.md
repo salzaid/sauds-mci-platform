@@ -1,6 +1,6 @@
 # Saud's MCI & Disaster Management Platform
 
-> **A comprehensive, web-based Mass Casualty Incident (MCI) and Disaster Management Platform for the Kuwait Ministry of Health and hospital networks.**
+> **A comprehensive, web-based Mass Casualty Incident (MCI) and Disaster Management Platform for hospital networks and emergency response organisations.**
 
 Built and designed by **Saud Naji Alzaid**, this platform supports the full chain of survival — from scene triage through definitive surgical care, inter-facility coordination, and after-action review — aligned with internationally recognised standards including SALT, HICS, CO-S-TR, WHO EMT MDS, and HL7 FHIR R4/R5.
 
@@ -25,7 +25,7 @@ Built and designed by **Saud Naji Alzaid**, this platform supports the full chai
 
 ## Overview
 
-Saud's MCI Platform is a full-stack web application that provides real-time situational awareness and operational coordination during mass casualty incidents and disasters. It is designed for use by hospital incident command teams, emergency physicians, triage officers, logistics coordinators, and Ministry of Health oversight personnel.
+Saud's MCI Platform is a full-stack web application that provides real-time situational awareness and operational coordination during mass casualty incidents and disasters. It is designed for use by hospital incident command teams, emergency physicians, triage officers, logistics coordinators, and emergency response oversight personnel.
 
 The platform is **invite-only** by design — access is controlled exclusively by administrators who issue time-limited invitation links. Uninvited hospital staff may submit a Request Access form from the landing page, which notifies the administrator for review.
 
@@ -121,7 +121,7 @@ Manus provides built-in hosting with custom domain support, automatic SSL, a man
 
 ### Self-Hosted Deployment
 
-For on-premises or cloud deployments (e.g., Kuwait MoH data-residency requirements):
+For on-premises or cloud deployments (e.g., organisations with data-residency requirements):
 
 #### Option A — Docker (Recommended for self-hosting)
 
@@ -303,7 +303,7 @@ SOFTWARE.
 
 **Platform Owner & Architect:** Saud Naji Alzaid
 
-This platform was designed and built to serve the Kuwait Ministry of Health and its affiliated hospital network. The clinical decision logic, triage algorithms, and operational workflows are based on the following internationally recognised standards and publications:
+This platform was designed and built by Saud Naji Alzaid. The clinical decision logic, triage algorithms, and operational workflows are based on the following internationally recognised standards and publications:
 
 - ASPR TRACIE — Hospital Mass Casualty Response Plan Considerations and CO-S-TR Model
 - California Hospital Association — Hospital Incident Command System (HICS)

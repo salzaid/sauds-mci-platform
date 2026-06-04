@@ -191,7 +191,7 @@ export default function InvitePage({ token }: { token: string }) {
               )}
 
               <p className="text-xs text-muted-foreground text-center">
-                By accepting, you agree to use this platform in accordance with Kuwait Ministry of Health data policies.
+                By accepting, you agree to use this platform in accordance with applicable data protection policies.
               </p>
             </CardContent>
           </>

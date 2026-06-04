@@ -33,7 +33,7 @@ async function sendInviteEmail(opts: {
   const roleLabel = roleLabels[opts.role] ?? opts.role;
 
   // Use LLM to compose a professional invite email body
-  const prompt = `Write a concise, professional HTML email body (no <html>/<body> tags, just the inner content) inviting someone to join "Saud's MCI Platform" — a Mass Casualty Incident & Disaster Management Platform for Kuwait Ministry of Health.
+  const prompt = `Write a concise, professional HTML email body (no <html>/<body> tags, just the inner content) inviting someone to join "Saud's MCI Platform" — a Mass Casualty Incident & Disaster Management Platform.
 
 Details:
 - Invited by: ${opts.inviterName}

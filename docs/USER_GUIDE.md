@@ -313,7 +313,7 @@ URGENT and FLASH messages display a green checkmark button. Click it to acknowle
 
 ## 11. WHO EMT MDS Reporting
 
-The WHO Emergency Medical Team Minimum Data Set (EMT MDS) module is used by deployed Emergency Medical Teams to submit standardised daily situation reports to the WHO Emergency Medical Team Coordination Cell (EMTCC) and the national Ministry of Health.
+The WHO Emergency Medical Team Minimum Data Set (EMT MDS) module is used by deployed Emergency Medical Teams to submit standardised daily situation reports to the WHO Emergency Medical Team Coordination Cell (EMTCC) and relevant health authorities.
 
 ### Completing a Daily Report
 
@@ -327,7 +327,7 @@ Select the incident and click **New Report**. The form covers the four WHO EMT M
 
 **Needs and Risks** — operational constraints, community health risks, and resource needs for the next reporting period.
 
-Click **Submit Report** to record the report. Submitted reports can be exported for transmission to the WHO EMTCC gateway or the national MoH endpoint.
+Click **Submit Report** to record the report. Submitted reports can be exported for transmission to the WHO EMTCC gateway or the relevant national health authority endpoint.
 
 ---
 
@@ -361,7 +361,7 @@ The Family Reunification Portal is a **publicly accessible** page that allows fa
 
 ### What Information is Available
 
-The portal shows only the patient's general status category (e.g., "Receiving Treatment", "Discharged", "Transferred"). No names, injuries, diagnoses, or other personal health information are displayed. This is by design to protect patient privacy in accordance with HIPAA, GDPR, and Kuwait data protection law.
+The portal shows only the patient's general status category (e.g., "Receiving Treatment", "Discharged", "Transferred"). No names, injuries, diagnoses, or other personal health information are displayed. This is by design to protect patient privacy in accordance with applicable data protection regulations including HIPAA and GDPR.
 
 ### How to Search
 
@@ -417,13 +417,12 @@ A: Yes. The platform is fully responsive and works on mobile browsers. The sideb
 
 | Contact | Number |
 |---|---|
-| Kuwait Emergency Services | 112 |
-| Kuwait Ministry of Health | +965-2221-0000 |
+| Emergency Services | 112 |
 | Platform Administrator | Contact via Admin → Users |
 
 ---
 
 *This guide covers platform version 1.0. For the most current version, refer to the platform's built-in help or contact your administrator.*
 
-*Saud's MCI Platform — Built for Kuwait Ministry of Health*  
+*Saud's MCI Platform*  
 *© 2026 Saud Naji Alzaid — MIT License*

@@ -346,7 +346,7 @@ Auto-refresh intervals are set conservatively (10–30 seconds) to avoid databas
 
 ### Cloud-Primary (Manus Hosting)
 
-The recommended deployment for most organisations. Manus provides managed MySQL, object storage, OAuth, CDN, and SSL with zero infrastructure management. Suitable for Ministry of Health command centres and regional coordination.
+The recommended deployment for most organisations. Manus provides managed MySQL, object storage, OAuth, CDN, and SSL with zero infrastructure management. Suitable for regional command centres and multi-facility coordination.
 
 ### Hospital On-Premises
 
@@ -365,7 +365,7 @@ A planned v3 capability will support a minimal single-node deployment on ARM dev
 | **v1 (current)** | All 11 modules, bilingual EN/AR, invite-only access, 61 unit tests | Complete |
 | **v2** | WebSocket real-time push, FHIR R4/R5 bulk export, barcode/NFC tag scanning, voice input for triage | Planned |
 | **v3** | Offline-first PWA service worker, tactical edge deployment, full Arabic translation coverage | Planned |
-| **v4** | EHR integration (SMART-on-FHIR launch), national MoH reporting gateway, biometric identity reconciliation | Planned |
+| **v4** | EHR integration (SMART-on-FHIR launch), national health authority reporting gateway, biometric identity reconciliation | Planned |
 
 ---
 

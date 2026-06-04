@@ -108,7 +108,7 @@ export default function Incidents() {
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>Declare New Incident — الإعلان عن حادث جديد</DialogTitle></DialogHeader>
           <form onSubmit={handleSubmit(d => createMutation.mutate(d as any))} className="space-y-4">
-            <div className="space-y-2"><Label>Incident Name (English) *</Label><Input {...register("name",{required:true})} placeholder="e.g. Kuwait Petrochemical Plant Fire" /></div>
+            <div className="space-y-2"><Label>Incident Name (English) *</Label><Input {...register("name",{required:true})} placeholder="e.g. Petrochemical Plant Fire — Sector 7" /></div>
             <div className="space-y-2"><Label>اسم الحادث (عربي)</Label><Input {...register("nameAr")} placeholder="اسم الحادث" dir="rtl" /></div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2"><Label>Type</Label>

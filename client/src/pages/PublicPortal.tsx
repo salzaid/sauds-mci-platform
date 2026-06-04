@@ -138,8 +138,8 @@ export default function PublicPortal() {
         {/* Privacy notice */}
         <p className="text-xs text-muted-foreground text-center mt-6">
           {isAr
-            ? "هذه البوابة تعرض معلومات الحالة العامة فقط. لا تُشارك أي بيانات طبية شخصية. وزارة الصحة — دولة الكويت."
-            : "This portal displays general status information only. No personal medical data is shared. Kuwait Ministry of Health."
+            ? "هذه البوابة تعرض معلومات الحالة العامة فقط. لا تُشارك أي بيانات طبية شخصية."
+            : "This portal displays general status information only. No personal medical data is shared."
           }
         </p>
       </div>
