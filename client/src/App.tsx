@@ -22,6 +22,7 @@ import AAR from "./pages/AAR";
 import Comms from "./pages/Comms";
 import AdminPanel from "./pages/AdminPanel";
 import PublicPortal from "./pages/PublicPortal";
+import InvitePage from "./pages/InvitePage";
 
 function Router() {
   return (
@@ -29,6 +30,9 @@ function Router() {
       {/* Public routes */}
       <Route path="/" component={Home} />
       <Route path="/public-portal" component={PublicPortal} />
+      <Route path="/invite/:token">
+        {(params) => <InvitePage token={params.token} />}
+      </Route>
 
       {/* Protected app routes — wrapped in MCILayout */}
       <Route path="/dashboard">

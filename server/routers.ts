@@ -12,6 +12,7 @@ import { emtMdsRouter } from "./routers/emtMds";
 import { commsRouter } from "./routers/comms";
 import { adminRouter } from "./routers/admin";
 import { dashboardRouter } from "./routers/dashboard";
+import { invitationsRouter } from "./routers/invitations";
 
 export const appRouter = router({
   system: systemRouter,
@@ -33,6 +34,7 @@ export const appRouter = router({
   comms: commsRouter,
   admin: adminRouter,
   dashboard: dashboardRouter,
+  invitations: invitationsRouter,
 });
 
 export type AppRouter = typeof appRouter;

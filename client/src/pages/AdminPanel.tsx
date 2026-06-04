@@ -10,13 +10,19 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Settings, Users, Building2, Shield, Search, Plus, Edit } from "lucide-react";
+import { Settings, Users, Building2, Shield, Search, Plus, Edit, Mail, Send, Copy, RefreshCw, XCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 const roles = ["superadmin","admin","incident_commander","clinician","triage_officer","logistics","viewer"] as const;
+
+const roleLabels: Record<string, string> = {
+  superadmin: "Super Admin", admin: "Admin", incident_commander: "Incident Commander",
+  clinician: "Clinician", triage_officer: "Triage Officer", logistics: "Logistics Officer", viewer: "Viewer",
+};
 
 const roleColors: Record<string, string> = {
   superadmin: "text-red-400 border-red-500/30", admin: "text-orange-400 border-orange-500/30",
@@ -25,18 +31,28 @@ const roleColors: Record<string, string> = {
   viewer: "text-muted-foreground border-border",
 };
 
+const inviteStatusColors: Record<string, string> = {
+  PENDING: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  ACCEPTED: "bg-green-500/20 text-green-400 border-green-500/30",
+  REVOKED: "bg-muted text-muted-foreground border-border",
+  EXPIRED: "bg-muted text-muted-foreground border-border",
+};
+
 export default function AdminPanel() {
   const { t } = useLang();
   const { user } = useAuth();
   const [editUser, setEditUser] = useState<any>(null);
   const [editFacility, setEditFacility] = useState<any>(null);
   const [showCreateFacility, setShowCreateFacility] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
+  const [inviteResult, setInviteResult] = useState<{ inviteUrl: string; email: string } | null>(null);
   const [search, setSearch] = useState("");
   const utils = trpc.useUtils();
 
   const { data: users, isLoading: usersLoading } = trpc.admin.listUsers.useQuery({ search, limit: 50 });
   const { data: facilities, isLoading: facilitiesLoading } = trpc.admin.listFacilities.useQuery({ includeInactive: true });
   const { data: auditLogs } = trpc.admin.listAuditLogs.useQuery({ limit: 50 });
+  const { data: invitesList, isLoading: invitesLoading } = trpc.invitations.list.useQuery({ limit: 50 });
 
   const updateUser = trpc.admin.updateUser.useMutation({
     onSuccess: () => { utils.admin.listUsers.invalidate(); setEditUser(null); toast.success("User updated"); },
@@ -53,9 +69,36 @@ export default function AdminPanel() {
     onError: (err) => toast.error(err.message),
   });
 
+  const sendInvite = trpc.invitations.create.useMutation({
+    onSuccess: (data) => {
+      utils.invitations.list.invalidate();
+      setInviteResult({ inviteUrl: data.inviteUrl, email: data.invitation.email });
+      resetInvite();
+      toast.success(`Invitation created for ${data.invitation.email}`);
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const revokeInvite = trpc.invitations.revoke.useMutation({
+    onSuccess: () => { utils.invitations.list.invalidate(); toast.success("Invitation revoked"); },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const resendInvite = trpc.invitations.resend.useMutation({
+    onSuccess: (data) => {
+      utils.invitations.list.invalidate();
+      navigator.clipboard.writeText(data.inviteUrl).catch(() => {});
+      toast.success("Invite link extended and copied to clipboard");
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
   const { register: registerU, handleSubmit: handleSubmitU, setValue: setValueU } = useForm();
   const { register: registerF, handleSubmit: handleSubmitF, reset: resetFac, setValue: setValueF } = useForm({
     defaultValues: { name: "", nameAr: "", code: "", type: "hospital", city: "", phone: "", traumaLevel: "", totalBeds: 0, icuBeds: 0, orRooms: 0, ventilators: 0 },
+  });
+  const { register: registerI, handleSubmit: handleSubmitI, reset: resetInvite, setValue: setValueI } = useForm({
+    defaultValues: { email: "", role: "viewer", facilityId: undefined as number | undefined, message: "" },
   });
 
   const isAdmin = user?.role === "superadmin" || user?.role === "admin";
@@ -66,21 +109,84 @@ export default function AdminPanel() {
     </div>
   );
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => toast.success("Invite link copied to clipboard!")).catch(() => toast.error("Could not copy — please copy manually"));
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Admin Panel — لوحة الإدارة</h1>
-        <p className="text-muted-foreground text-sm mt-1">User management, facilities, roles, and audit logs</p>
+        <p className="text-muted-foreground text-sm mt-1">User management, invitations, facilities, roles, and audit logs</p>
       </div>
 
-      <Tabs defaultValue="users">
+      <Tabs defaultValue="invitations">
         <TabsList>
+          <TabsTrigger value="invitations"><Mail className="h-4 w-4 mr-2" />Invitations</TabsTrigger>
           <TabsTrigger value="users"><Users className="h-4 w-4 mr-2" />Users</TabsTrigger>
           <TabsTrigger value="facilities"><Building2 className="h-4 w-4 mr-2" />Facilities</TabsTrigger>
           <TabsTrigger value="audit"><Shield className="h-4 w-4 mr-2" />Audit Log</TabsTrigger>
         </TabsList>
 
-        {/* Users Tab */}
+        {/* ── Invitations Tab ─────────────────────────────────────────────────── */}
+        <TabsContent value="invitations" className="space-y-4 mt-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">Invite people to the platform before they sign in. They'll receive a link to claim their account with a pre-assigned role.</p>
+            <Button onClick={() => setShowInvite(true)}><Plus className="h-4 w-4 mr-2" />Send Invitation</Button>
+          </div>
+
+          <div className="space-y-3">
+            {invitesLoading ? Array.from({length:3}).map((_,i) => <Skeleton key={i} className="h-16" />) :
+            invitesList?.length === 0 ? (
+              <Card><CardContent className="py-12 text-center text-muted-foreground">
+                <Mail className="h-10 w-10 mx-auto mb-3 opacity-20" />
+                <p>No invitations sent yet</p>
+                <Button className="mt-4" onClick={() => setShowInvite(true)}><Plus className="h-4 w-4 mr-2" />Send First Invitation</Button>
+              </CardContent></Card>
+            ) : invitesList?.map(inv => (
+              <Card key={inv.id}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <Badge variant="outline" className={inviteStatusColors[inv.status]}>{inv.status}</Badge>
+                        <Badge variant="outline" className={`text-xs ${roleColors[inv.role]}`}>{roleLabels[inv.role]}</Badge>
+                      </div>
+                      <p className="font-medium text-sm">{inv.email}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Invited by {inv.invitedByName} · {new Date(inv.createdAt).toLocaleDateString()}
+                        {inv.status === "PENDING" && (
+                          <span className="ml-2 flex items-center gap-1 inline-flex">
+                            <Clock className="h-3 w-3" />
+                            Expires {new Date(inv.expiresAt).toLocaleDateString()}
+                          </span>
+                        )}
+                        {inv.status === "ACCEPTED" && inv.acceptedAt && (
+                          <span className="ml-2 text-green-400">Accepted {new Date(inv.acceptedAt).toLocaleDateString()}</span>
+                        )}
+                      </p>
+                      {inv.message && <p className="text-xs text-muted-foreground italic mt-1">"{inv.message}"</p>}
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      {inv.status === "PENDING" && (
+                        <>
+                          <Button size="sm" variant="outline" onClick={() => resendInvite.mutate({ id: inv.id, origin: window.location.origin })} disabled={resendInvite.isPending}>
+                            <RefreshCw className="h-3 w-3 mr-1" />Resend
+                          </Button>
+                          <Button size="sm" variant="outline" className="text-destructive hover:text-destructive" onClick={() => revokeInvite.mutate({ id: inv.id })} disabled={revokeInvite.isPending}>
+                            <XCircle className="h-3 w-3 mr-1" />Revoke
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        {/* ── Users Tab ───────────────────────────────────────────────────────── */}
         <TabsContent value="users" className="space-y-4 mt-4">
           <div className="flex items-center gap-3">
             <div className="relative flex-1 max-w-sm">
@@ -132,7 +238,7 @@ export default function AdminPanel() {
           </Card>
         </TabsContent>
 
-        {/* Facilities Tab */}
+        {/* ── Facilities Tab ──────────────────────────────────────────────────── */}
         <TabsContent value="facilities" className="space-y-4 mt-4">
           <Button onClick={() => setShowCreateFacility(true)}><Plus className="h-4 w-4 mr-2" />Add Facility</Button>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -161,7 +267,7 @@ export default function AdminPanel() {
           </div>
         </TabsContent>
 
-        {/* Audit Log Tab */}
+        {/* ── Audit Log Tab ───────────────────────────────────────────────────── */}
         <TabsContent value="audit" className="space-y-4 mt-4">
           <Card>
             <CardContent className="p-0">
@@ -195,20 +301,96 @@ export default function AdminPanel() {
         </TabsContent>
       </Tabs>
 
-      {/* Edit User Dialog */}
+      {/* ── Send Invitation Dialog ─────────────────────────────────────────────── */}
+      <Dialog open={showInvite} onOpenChange={v => { setShowInvite(v); if (!v) setInviteResult(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-primary" />
+              Send Invitation — دعوة مستخدم جديد
+            </DialogTitle>
+          </DialogHeader>
+
+          {inviteResult ? (
+            <div className="space-y-4">
+              <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl text-center">
+                <p className="text-green-400 font-semibold mb-1">Invitation created!</p>
+                <p className="text-sm text-muted-foreground">Share this link with <span className="font-medium text-foreground">{inviteResult.email}</span></p>
+              </div>
+              <div className="space-y-2">
+                <Label>Invite Link</Label>
+                <div className="flex gap-2">
+                  <Input value={inviteResult.inviteUrl} readOnly className="text-xs font-mono" />
+                  <Button size="icon" variant="outline" onClick={() => copyToClipboard(inviteResult.inviteUrl)}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">The invitee can also receive this via email if configured. The link expires in 7 days.</p>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => { setInviteResult(null); }}>Send Another</Button>
+                <Button onClick={() => { setShowInvite(false); setInviteResult(null); }}>Done</Button>
+              </DialogFooter>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmitI(d => sendInvite.mutate({ ...d as any, origin: window.location.origin }))} className="space-y-4">
+              <div className="space-y-2">
+                <Label>Email Address *</Label>
+                <Input {...registerI("email", { required: true })} type="email" placeholder="colleague@example.com" />
+              </div>
+              <div className="space-y-2">
+                <Label>Assigned Role</Label>
+                <Select onValueChange={v => setValueI("role", v)} defaultValue="viewer">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {roles.map(r => (
+                      <SelectItem key={r} value={r}>
+                        <span className={roleColors[r]}>{roleLabels[r]}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">The user will be assigned this role when they accept the invitation.</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Facility (optional)</Label>
+                <Select onValueChange={v => setValueI("facilityId", Number(v))}>
+                  <SelectTrigger><SelectValue placeholder="No specific facility" /></SelectTrigger>
+                  <SelectContent>
+                    {facilities?.map(f => <SelectItem key={f.id} value={f.id.toString()}>{f.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Personal Message (optional)</Label>
+                <Textarea {...registerI("message")} placeholder="e.g. Welcome to the team! You'll be covering the ED triage shift." rows={3} maxLength={500} />
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setShowInvite(false)}>Cancel</Button>
+                <Button type="submit" disabled={sendInvite.isPending}>
+                  <Send className="h-4 w-4 mr-2" />
+                  {sendInvite.isPending ? "Creating..." : "Create Invitation"}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Edit User Dialog ─────────────────────────────────────────────────── */}
       <Dialog open={!!editUser} onOpenChange={() => setEditUser(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Edit User: {editUser?.name}</DialogTitle></DialogHeader>
           <form onSubmit={handleSubmitU(d => updateUser.mutate({ id: editUser.id, ...d as any }))} className="space-y-4">
             <div className="space-y-2"><Label>Role</Label>
-              <Select onValueChange={v => setValueU("role",v)} defaultValue={editUser?.role}>
+              <Select onValueChange={v => setValueU("role", v)} defaultValue={editUser?.role}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{roles.map(r => <SelectItem key={r} value={r}>{t(`role.${r}`)}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="space-y-2"><Label>Job Title</Label><Input {...registerU("jobTitle")} defaultValue={editUser?.jobTitle ?? ""} /></div>
             <div className="flex items-center gap-3">
-              <Switch id="active" defaultChecked={editUser?.isActive} onCheckedChange={v => setValueU("isActive",v)} />
+              <Switch id="active" defaultChecked={editUser?.isActive} onCheckedChange={v => setValueU("isActive", v)} />
               <Label htmlFor="active">Active Account</Label>
             </div>
             <DialogFooter>
@@ -219,19 +401,19 @@ export default function AdminPanel() {
         </DialogContent>
       </Dialog>
 
-      {/* Create Facility Dialog */}
+      {/* ── Create Facility Dialog ───────────────────────────────────────────── */}
       <Dialog open={showCreateFacility} onOpenChange={setShowCreateFacility}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>Add Facility — إضافة منشأة</DialogTitle></DialogHeader>
           <form onSubmit={handleSubmitF(d => createFacility.mutate(d as any))} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2"><Label>Name (EN) *</Label><Input {...registerF("name",{required:true})} /></div>
+              <div className="space-y-2"><Label>Name (EN) *</Label><Input {...registerF("name", { required: true })} /></div>
               <div className="space-y-2"><Label>الاسم (AR)</Label><Input {...registerF("nameAr")} dir="rtl" /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2"><Label>Code *</Label><Input {...registerF("code",{required:true})} placeholder="KW-MOH-001" /></div>
+              <div className="space-y-2"><Label>Code *</Label><Input {...registerF("code", { required: true })} placeholder="KW-MOH-001" /></div>
               <div className="space-y-2"><Label>Type</Label>
-                <Select onValueChange={v => setValueF("type",v)} defaultValue="hospital">
+                <Select onValueChange={v => setValueF("type", v)} defaultValue="hospital">
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {["hospital","field_hospital","clinic","command_center"].map(t => <SelectItem key={t} value={t}>{t.replace(/_/g," ")}</SelectItem>)}
@@ -244,10 +426,10 @@ export default function AdminPanel() {
               <div className="space-y-2"><Label>Phone</Label><Input {...registerF("phone")} /></div>
             </div>
             <div className="grid grid-cols-4 gap-2">
-              <div className="space-y-2"><Label>Total Beds</Label><Input type="number" {...registerF("totalBeds",{valueAsNumber:true})} min={0} /></div>
-              <div className="space-y-2"><Label>ICU Beds</Label><Input type="number" {...registerF("icuBeds",{valueAsNumber:true})} min={0} /></div>
-              <div className="space-y-2"><Label>OR Rooms</Label><Input type="number" {...registerF("orRooms",{valueAsNumber:true})} min={0} /></div>
-              <div className="space-y-2"><Label>Ventilators</Label><Input type="number" {...registerF("ventilators",{valueAsNumber:true})} min={0} /></div>
+              <div className="space-y-2"><Label>Total Beds</Label><Input type="number" {...registerF("totalBeds", { valueAsNumber: true })} min={0} /></div>
+              <div className="space-y-2"><Label>ICU Beds</Label><Input type="number" {...registerF("icuBeds", { valueAsNumber: true })} min={0} /></div>
+              <div className="space-y-2"><Label>OR Rooms</Label><Input type="number" {...registerF("orRooms", { valueAsNumber: true })} min={0} /></div>
+              <div className="space-y-2"><Label>Ventilators</Label><Input type="number" {...registerF("ventilators", { valueAsNumber: true })} min={0} /></div>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowCreateFacility(false)}>Cancel</Button>

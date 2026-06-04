@@ -337,3 +337,25 @@ export const auditLogs = mysqlTable("audit_logs", {
 
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = typeof auditLogs.$inferInsert;
+
+// ─── Invitations ──────────────────────────────────────────────────────────────
+
+export const invitations = mysqlTable("invitations", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }).notNull(),
+  role: mysqlEnum("role", ["superadmin","admin","incident_commander","clinician","triage_officer","logistics","viewer"]).default("viewer").notNull(),
+  facilityId: int("facilityId"),
+  token: varchar("token", { length: 128 }).notNull().unique(),
+  invitedById: int("invitedById").notNull(),
+  invitedByName: varchar("invitedByName", { length: 256 }),
+  message: text("message"),
+  status: mysqlEnum("status", ["PENDING","ACCEPTED","REVOKED","EXPIRED"]).default("PENDING").notNull(),
+  acceptedAt: timestamp("acceptedAt"),
+  acceptedByUserId: int("acceptedByUserId"),
+  expiresAt: timestamp("expiresAt").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Invitation = typeof invitations.$inferSelect;
+export type InsertInvitation = typeof invitations.$inferInsert;
