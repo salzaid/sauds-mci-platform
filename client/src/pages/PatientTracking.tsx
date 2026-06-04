@@ -134,9 +134,7 @@ export default function PatientTracking({ incidentId }: { incidentId?: number })
                             }
                           </td>
                           <td className="py-3">
-                            <Link href={`/casualties/${c.id}`}>
-                              <a className="text-primary hover:text-primary/80"><ChevronRight className="h-4 w-4" /></a>
-                            </Link>
+                            <Link href={`/casualties/${c.id}`} className="text-primary hover:text-primary/80"><ChevronRight className="h-4 w-4" /></Link>
                           </td>
                         </tr>
                       ))}

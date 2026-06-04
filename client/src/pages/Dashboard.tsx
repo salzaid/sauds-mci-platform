@@ -24,7 +24,7 @@ function StatCard({ title, value, icon: Icon, color, href }: { title: string; va
       </CardContent>
     </Card>
   );
-  if (href) return <Link href={href}><a>{content}</a></Link>;
+  if (href) return <Link href={href} className="block">{content}</Link>;
   return content;
 }
 
@@ -86,10 +86,8 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-base font-semibold">Active Incidents</CardTitle>
-            <Link href="/incidents">
-              <a className="text-xs text-primary flex items-center gap-1 hover:underline">
+            <Link href="/incidents" className="text-xs text-primary flex items-center gap-1 hover:underline">
                 View all <ChevronRight className="h-3 w-3" />
-              </a>
             </Link>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -102,8 +100,7 @@ export default function Dashboard() {
               </div>
             ) : (
               incidents.data?.map(inc => (
-                <Link key={inc.id} href={`/incidents/${inc.id}`}>
-                  <a className="block p-3 rounded-lg border border-border hover:border-primary/50 transition-colors">
+                <Link key={inc.id} href={`/incidents/${inc.id}`} className="block p-3 rounded-lg border border-border hover:border-primary/50 transition-colors">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <p className="font-medium text-sm truncate">{inc.name}</p>
@@ -121,7 +118,6 @@ export default function Dashboard() {
                     {inc.locationDescription && (
                       <p className="text-xs text-muted-foreground mt-1 truncate">{inc.locationDescription}</p>
                     )}
-                  </a>
                 </Link>
               ))
             )}
@@ -144,12 +140,10 @@ export default function Dashboard() {
             ].map(action => {
               const Icon = action.icon;
               return (
-                <Link key={action.href} href={action.href}>
-                  <a className="flex flex-col items-center gap-2 p-4 rounded-lg border border-border hover:border-primary/50 hover:bg-accent transition-all text-center">
+                <Link key={action.href} href={action.href} className="flex flex-col items-center gap-2 p-4 rounded-lg border border-border hover:border-primary/50 hover:bg-accent transition-all text-center">
                     <Icon className={`h-6 w-6 ${action.color}`} />
                     <span className="text-xs font-medium">{action.label}</span>
                     <span className="text-xs text-muted-foreground">{action.labelAr}</span>
-                  </a>
                 </Link>
               );
             })}

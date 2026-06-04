@@ -114,11 +114,9 @@ export default function IncidentDetail({ id }: { id: number }) {
         ].map(action => {
           const Icon = action.icon;
           return (
-            <Link key={action.href} href={action.href}>
-              <a className="flex items-center gap-3 p-4 rounded-lg border border-border hover:border-primary/50 hover:bg-accent transition-all">
-                <Icon className={`h-5 w-5 ${action.color} shrink-0`} />
-                <span className="text-sm font-medium">{action.label}</span>
-              </a>
+            <Link key={action.href} href={action.href} className="flex items-center gap-3 p-4 rounded-lg border border-border hover:border-primary/50 hover:bg-accent transition-all">
+              <Icon className={`h-5 w-5 ${action.color} shrink-0`} />
+              <span className="text-sm font-medium">{action.label}</span>
             </Link>
           );
         })}

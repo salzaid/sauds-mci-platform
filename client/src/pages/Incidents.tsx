@@ -77,8 +77,7 @@ export default function Incidents() {
       ) : (
         <div className="space-y-3">
           {incidents?.map(inc => (
-            <Link key={inc.id} href={`/incidents/${inc.id}`}>
-              <a className="block">
+            <Link key={inc.id} href={`/incidents/${inc.id}`} className="block">
                 <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                   <CardContent className="p-5">
                     <div className="flex items-start justify-between gap-4">
@@ -100,7 +99,6 @@ export default function Incidents() {
                     </div>
                   </CardContent>
                 </Card>
-              </a>
             </Link>
           ))}
         </div>

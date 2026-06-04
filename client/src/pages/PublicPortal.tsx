@@ -33,7 +33,7 @@ export default function PublicPortal() {
       <div className="border-b border-border bg-card">
         <div className="container py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/"><a className="text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /></a></Link>
+            <Link href="/" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /></Link>
             <AlertTriangle className="h-5 w-5 text-primary" />
             <div>
               <p className="font-semibold text-sm">MCI Platform — Kuwait MoH</p>

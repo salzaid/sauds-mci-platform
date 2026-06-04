@@ -78,19 +78,18 @@ export default function MCILayout({ children }: MCILayoutProps) {
     const isActive = location === item.href || location.startsWith(item.href + "/");
     const Icon = item.icon;
     return (
-      <Link href={item.href}>
-        <a
-          onClick={() => setSidebarOpen(false)}
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
-            isActive
-              ? "bg-primary text-primary-foreground"
-              : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          }`}
-        >
-          <Icon className="h-4 w-4 shrink-0" />
-          <span>{t(item.key)}</span>
-          {isActive && <ChevronRight className={`h-3 w-3 ${dir === "rtl" ? "mr-auto rotate-180" : "ml-auto"}`} />}
-        </a>
+      <Link
+        href={item.href}
+        onClick={() => setSidebarOpen(false)}
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
+          isActive
+            ? "bg-primary text-primary-foreground"
+            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        }`}
+      >
+        <Icon className="h-4 w-4 shrink-0" />
+        <span>{t(item.key)}</span>
+        {isActive && <ChevronRight className={`h-3 w-3 ${dir === "rtl" ? "mr-auto rotate-180" : "ml-auto"}`} />}
       </Link>
     );
   };
@@ -120,11 +119,9 @@ export default function MCILayout({ children }: MCILayoutProps) {
           </>
         )}
         <div className="pt-3 pb-1">
-          <Link href="/public-portal">
-            <a className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-150">
-              <Globe className="h-4 w-4 shrink-0" />
-              <span>{t("nav.publicPortal")}</span>
-            </a>
+          <Link href="/public-portal" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-150">
+            <Globe className="h-4 w-4 shrink-0" />
+            <span>{t("nav.publicPortal")}</span>
           </Link>
         </div>
       </nav>
