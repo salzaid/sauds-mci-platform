@@ -1,14 +1,14 @@
 import { useAuth } from "@/_core/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { getLoginUrl } from "@/const";
-import { AlertTriangle, Activity, Users, Shield, Globe, ChevronRight, Stethoscope, Truck, BarChart3 } from "lucide-react";
+import { AlertTriangle, Globe, Stethoscope, Activity, Shield, Truck, BarChart3, Users, Lock } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
+import { Link } from "wouter";
 
 export default function Home() {
   const { isAuthenticated, loading } = useAuth();
   const [, navigate] = useLocation();
 
+  // Authenticated users go straight to dashboard
   useEffect(() => {
     if (!loading && isAuthenticated) {
       navigate("/dashboard");
@@ -36,30 +36,33 @@ export default function Home() {
                 <AlertTriangle className="h-8 w-8 text-primary" />
               </div>
               <div>
-          <p className="text-sm text-muted-foreground font-medium">Saud's MCI Platform</p>
-            <p className="text-xs text-muted-foreground">منصة سعود للكوارث الطبية</p>
+                <p className="text-sm text-muted-foreground font-medium">Saud's MCI Platform</p>
+                <p className="text-xs text-muted-foreground">منصة سعود للكوارث الطبية</p>
               </div>
             </div>
-<h1 className="text-5xl font-bold tracking-tight mb-3">
-            Saud's MCI &<br />
-            <span className="text-primary">Disaster Platform</span>
-          </h1>
-          <p className="text-xl text-muted-foreground mb-2">منصة سعود لإدارة حوادث الإصابات الجماعية والكوارث</p>
+            <h1 className="text-5xl font-bold tracking-tight mb-3">
+              Saud's MCI &<br />
+              <span className="text-primary">Disaster Platform</span>
+            </h1>
+            <p className="text-xl text-muted-foreground mb-2">منصة سعود لإدارة حوادث الإصابات الجماعية والكوارث</p>
             <p className="text-muted-foreground mb-8 max-w-xl">
               A comprehensive platform supporting the full chain of survival — from scene triage through definitive surgical care, inter-facility coordination, and after-action review.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <Button size="lg" asChild>
-                <a href={getLoginUrl()}>
-                  Sign In <ChevronRight className="ml-2 h-4 w-4" />
-                </a>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <a href="/public-portal">
-                  <Globe className="mr-2 h-4 w-4" />
-                  Family Reunification Portal
-                </a>
-              </Button>
+
+            {/* Invite-only access notice */}
+            <div className="inline-flex items-center gap-3 px-5 py-3 bg-muted/60 border border-border rounded-xl">
+              <Lock className="h-5 w-5 text-muted-foreground shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-foreground">Invite-only access</p>
+                <p className="text-xs text-muted-foreground">Access is restricted to authorised personnel. Contact your administrator to receive an invitation link.</p>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <Link href="/public-portal" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Globe className="h-4 w-4" />
+                Family Reunification Portal (public)
+              </Link>
             </div>
           </div>
         </div>
@@ -75,7 +78,7 @@ export default function Home() {
           {features.map((f) => {
             const Icon = f.icon;
             return (
-              <div key={f.title} className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-colors">
+              <div key={f.title} className="bg-card border border-border rounded-xl p-6">
                 <Icon className={`h-8 w-8 mb-4 ${f.color}`} />
                 <h3 className="font-semibold mb-1">{f.title}</h3>
                 <p className="text-xs text-muted-foreground mb-2">{f.titleAr}</p>

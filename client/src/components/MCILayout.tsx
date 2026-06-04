@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   LayoutDashboard, AlertTriangle, Activity, Users, Stethoscope,
   Truck, FileText, BarChart3, Radio, Settings, Globe, Menu, X,
-  LogOut, User, ChevronRight, Syringe, Package, ClipboardList
+  LogOut, User, ChevronRight, Syringe, Package, ClipboardList, Lock
 } from "lucide-react";
 
 const navItems = [
@@ -56,17 +56,21 @@ export default function MCILayout({ children }: MCILayoutProps) {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-6">
-        <div className="text-center space-y-2">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-6 p-4">
+        <div className="text-center space-y-2 max-w-sm">
           <div className="flex items-center justify-center gap-2 mb-4">
             <AlertTriangle className="h-10 w-10 text-primary" />
-            <h1 className="text-3xl font-bold text-foreground">MCI Platform</h1>
+            <h1 className="text-3xl font-bold text-foreground">Saud's MCI Platform</h1>
           </div>
-          <p className="text-muted-foreground">Kuwait Ministry of Health — Disaster Management</p>
+          <p className="text-muted-foreground text-sm">منصة سعود للكوارث الطبية</p>
         </div>
-        <Button size="lg" asChild>
-          <a href={getLoginUrl()}>Sign In to Continue</a>
-        </Button>
+        <div className="flex items-center gap-3 px-5 py-4 bg-muted/60 border border-border rounded-xl max-w-sm w-full">
+          <Lock className="h-5 w-5 text-muted-foreground shrink-0" />
+          <div>
+            <p className="text-sm font-medium">Invite-only access</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Contact your administrator to receive an invitation link.</p>
+          </div>
+        </div>
       </div>
     );
   }
