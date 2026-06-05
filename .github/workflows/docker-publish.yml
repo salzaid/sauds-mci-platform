@@ -5,15 +5,15 @@ on:
     branches:
       - main
     tags:
-      - "v*.*.*"          # e.g. v1.0.0 — also triggers a versioned release tag
+      - "v*.*.*"
   pull_request:
     branches:
-      - main              # builds on PRs but does NOT push (for safety)
-  workflow_dispatch:      # allows manual trigger from the GitHub Actions UI
+      - main
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}   # salzaid/sauds-mci-platform
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-push:
@@ -21,19 +21,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write    # required to push to GHCR
+      packages: write
 
     steps:
-      # 1. Check out the source code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Set up Docker Buildx (enables multi-platform builds and caching)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 3. Log in to GitHub Container Registry
-      #    Uses the built-in GITHUB_TOKEN — no extra secrets needed.
       - name: Log in to GitHub Container Registry
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
@@ -42,11 +38,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 4. Extract metadata (tags and labels) for the image
-      #    - push to main  → ghcr.io/salzaid/sauds-mci-platform:latest
-      #    - push tag v1.2.3 → ghcr.io/salzaid/sauds-mci-platform:1.2.3
-      #                      + ghcr.io/salzaid/sauds-mci-platform:1.2
-      #                      + ghcr.io/salzaid/sauds-mci-platform:1
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -60,7 +51,6 @@ jobs:
             type=semver,pattern={{major}}
             type=raw,value=latest,enable={{is_default_branch}}
 
-      # 5. Build the image and push (skipped on pull requests)
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -68,6 +58,6 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha          # use GitHub Actions cache to speed up builds
+          cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64        # add linux/arm64 here for Raspberry Pi / M-chip support
+          platforms: linux/amd64
