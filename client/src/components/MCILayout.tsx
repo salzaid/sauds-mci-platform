@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   LayoutDashboard, AlertTriangle, Activity, Users, Stethoscope,
   Truck, FileText, BarChart3, Radio, Settings, Globe, Menu, X,
-  LogOut, User, ChevronRight, Syringe, Package, ClipboardList, Lock, KeyRound
+  LogOut, User, ChevronRight, Syringe, Package, ClipboardList, Lock, KeyRound, Info
 } from "lucide-react";
 import ChangePasswordDialog from "./ChangePasswordDialog";
 
@@ -133,6 +133,10 @@ export default function MCILayout({ children }: MCILayoutProps) {
           <Link href="/public-portal" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-150">
             <Globe className="h-4 w-4 shrink-0" />
             <span>{t("nav.publicPortal")}</span>
+          </Link>
+          <Link href="/about" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-150">
+            <Info className="h-4 w-4 shrink-0" />
+            <span>About</span>
           </Link>
         </div>
       </nav>

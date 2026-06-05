@@ -22,6 +22,7 @@ import AAR from "./pages/AAR";
 import Comms from "./pages/Comms";
 import AdminPanel from "./pages/AdminPanel";
 import PublicPortal from "./pages/PublicPortal";
+import About from "./pages/About";
 import InvitePage from "./pages/InvitePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -41,6 +42,7 @@ function Router() {
       {/* Public routes */}
       <Route path="/" component={Home} />
       <Route path="/public-portal" component={PublicPortal} />
+      <Route path="/about" component={About} />
       {/* Demo routes — no authentication required */}
       <Route path="/demo" component={DemoHome} />
       <Route path="/demo/dashboard">
