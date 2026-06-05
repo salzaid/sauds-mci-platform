@@ -83,13 +83,13 @@ export default function About() {
             </div>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
               <p>
-                This platform was born from a deeply personal place. As a trauma surgeon and intensivist practising in Kuwait and the broader Gulf region, I have witnessed first-hand the chaos that unfolds in the first hours of a mass casualty incident — the improvised triage tags, the paper tracking sheets, the radio calls that go unanswered, the blood bank that runs dry before anyone realises it.
+                This platform was born from the recent events in Kuwait and the broader Gulf region. I have witnessed first-hand the chaos that unfolds in the first hours of a mass casualty incident — the improvised triage tags, the paper tracking sheets, the breakdown in communication, and the lack of a dynamic feedback system.
               </p>
               <p>
-                Recent events in Kuwait and across the region — industrial accidents, road mass casualties, and the ever-present spectre of regional instability — made it clear that the gap between internationally recognised MCI standards and the tools available on the ground was unacceptably wide. Hospital incident command systems existed on paper. Triage algorithms were taught in courses but rarely practised in a digital environment. After-action reviews were conducted from memory.
+                Recent events made it clear that the gap between internationally recognised MCI standards and the tools available on the ground was unacceptably wide — with no viable open-source model available. Hospital incident command systems existed on paper. Triage algorithms were taught in courses but rarely practised in a digital environment. After-action reviews were conducted from memory.
               </p>
               <p>
-                I built this platform to close that gap. Not as an academic exercise, but as a practical tool that a triage officer can use with gloves on, that an incident commander can rely on at 3am, and that a logistics coordinator can use to know — in real time — that the blood bank is about to run out of O-negative.
+                I built this platform to close that gap. Not as an academic exercise, but as a practical tool that a triage officer can use with gloves on, that an incident commander can rely on at 3am, and that a logistics coordinator can use to know — in real time — that the team has what they need when they need it.
               </p>
               <p>
                 The platform is aligned with SALT, HICS, CO-S-TR, WHO EMT MDS, and HL7 FHIR R4/R5 because those are the standards that the international emergency medicine and disaster response community has converged on. They are not perfect, but they are shared — and shared standards save lives when hospitals from different systems have to work together.
