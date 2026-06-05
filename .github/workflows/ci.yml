@@ -1,0 +1,7 @@
+git clone https://github.com/salzaid/sauds-mci-platform.git
+cd sauds-mci-platform
+mkdir -p .github/workflows
+# Copy the two yml files in (content below )
+git add .github/
+git commit -m "feat: add GitHub Actions CI and Docker publish workflows"
+git push origin main
