@@ -3,7 +3,7 @@
 **For Medical and Healthcare Personnel**
 
 **Platform:** Saud's MCI & Disaster Management Platform  
-**Version:** 1.0  
+**Version:** 1.1  
 **Author:** Saud Naji Alzaid  
 **Audience:** Emergency physicians, triage officers, nurses, surgeons, logistics coordinators, incident commanders
 
@@ -28,8 +28,9 @@
 11. [WHO EMT MDS Reporting](#11-who-emt-mds-reporting)
 12. [After-Action Review](#12-after-action-review)
 13. [Family Reunification Portal](#13-family-reunification-portal)
-14. [Frequently Asked Questions](#14-frequently-asked-questions)
-15. [Quick Reference Card](#15-quick-reference-card)
+14. [Admin Panel](#14-admin-panel)
+15. [Frequently Asked Questions](#15-frequently-asked-questions)
+16. [Quick Reference Card](#16-quick-reference-card)
 
 ---
 
@@ -40,12 +41,20 @@
 Access to Saud's MCI Platform is **invite-only**. You will receive a personalised invitation link from your hospital administrator or incident commander. The link looks like this:
 
 ```
-https://mci.your-hospital.gov.kw/invite/AbCdEfGh...
+https://mci.your-hospital.example/invite/AbCdEfGh...
 ```
 
-When you open the link, you will see a page showing your assigned role and the name of the person who invited you. Click **Accept Invitation & Enter Platform** to sign in. You will be asked to authenticate with your Manus account (Google or email). After authentication, your role is applied automatically and you are taken to the dashboard.
+When you open the link, you will see a page showing your assigned role and the name of the person who invited you. You will be asked to create a password for your account. Enter a password of at least 8 characters, confirm it, and click **Create Account & Sign In**. You will be taken to the dashboard immediately.
 
 > **Invitation links expire after 7 days.** If your link has expired, contact your administrator to request a new one.
+
+### Signing In
+
+Once your account is created, you can sign in at any time by going to the platform's main page and clicking **Sign In**, or by navigating directly to `/login`. Enter your email address and the password you set when you accepted your invitation.
+
+### Forgot Your Password?
+
+Click **Forgot password?** on the sign-in page and enter your email address. Your administrator will receive a notification with a reset link, which they will forward to you. Open the link, set a new password, and you will be signed in automatically.
 
 ### Requesting Access
 
@@ -53,7 +62,7 @@ If you have not received an invitation, visit the platform's main page and click
 
 ### Your Role
 
-Your role determines which modules you can access and what actions you can perform. The table below summarises the typical roles assigned to clinical and operational staff.
+Your role determines which modules you can access and what actions you can perform.
 
 | Role | Typical Staff | Key Capabilities |
 |---|---|---|
@@ -63,9 +72,13 @@ Your role determines which modules you can access and what actions you can perfo
 | **Logistics** | Logistics coordinator, supply officer | Resources, transport, EMT MDS reporting |
 | **Viewer** | Observers, trainees | Read-only access to dashboards |
 
+### Changing Your Password
+
+After signing in, click your name in the bottom-left corner of the sidebar and select **Change Password**. Enter your current password, then your new password twice, and click **Change Password**.
+
 ### Language
 
-The platform supports both **English** and **Arabic (RTL)**. To switch languages, click your name in the bottom-left corner of the sidebar and select the language toggle. Your preference is saved automatically.
+The platform supports both **English** and **Arabic (RTL)**. Click your name in the bottom-left corner of the sidebar and select the language toggle. Your preference is saved automatically.
 
 ---
 
@@ -89,7 +102,7 @@ The platform refreshes automatically every 10–30 seconds depending on the modu
 
 ## 3. Scene Triage Module
 
-The Scene Triage module guides you through the **SALT** (Sort-Assess-Lifesaving interventions-Treatment/Transport) triage algorithm — the nationally endorsed US all-hazards triage standard — and records each casualty's assessment in real time.
+The Scene Triage module guides you through the **SALT** (Sort-Assess-Lifesaving interventions-Treatment/Transport) triage algorithm and records each casualty's assessment in real time.
 
 ### Selecting an Incident
 
@@ -101,17 +114,15 @@ Click **Register Casualty** to open the registration form. Enter the physical tr
 
 ### Completing the SALT Assessment
 
-The SALT assessment presents one question at a time with large YES / NO buttons designed for use with gloves or in low-light conditions. The questions follow this sequence:
+The SALT assessment presents one question at a time with large YES / NO buttons designed for use with gloves or in low-light conditions.
 
-**Step 1 — Sort:** "Can the patient walk to a designated area?" A YES answer immediately assigns the MINIMAL (Green) category. A NO answer proceeds to Step 2.
+**Step 1 — Sort:** "Can the patient walk to a designated area?" YES → MINIMAL. NO → proceed.
 
-**Step 2 — Life Threat:** "Does the patient have obvious life-threatening haemorrhage or airway obstruction?" A YES answer asks whether a lifesaving intervention is feasible. If not feasible, the patient is assigned EXPECTANT (Black). If feasible, perform the intervention and proceed to Step 3.
+**Step 2 — Life Threat:** "Does the patient have obvious life-threatening haemorrhage or airway obstruction?" YES and intervention not feasible → EXPECTANT. YES and intervention feasible → perform intervention and proceed.
 
-**Step 3 — Vital Signs:** "Is the respiratory rate abnormal (< 10 or > 30/min), pulse absent, or does the patient fail to follow commands?" A YES answer assigns IMMEDIATE (Red). A NO answer assigns DELAYED (Yellow).
+**Step 3 — Vital Signs:** "Is the respiratory rate abnormal (< 10 or > 30/min), pulse absent, or does the patient fail to follow commands?" YES → IMMEDIATE. NO → DELAYED.
 
-At the end of the assessment, you will see the triage category displayed prominently. Click **Confirm Triage** to record the assessment. The casualty is added to the tracking board immediately.
-
-> **Paediatric patients (age ≤ 8):** The JumpSTART algorithm is recommended for children. Select JumpSTART from the algorithm dropdown before starting the assessment. The key difference is that JumpSTART checks for the presence of a pulse before assessing respiratory rate, and uses 5 rescue breaths as an intervention step for apnoeic patients with a pulse.
+> **Paediatric patients (age ≤ 8):** Select JumpSTART from the algorithm dropdown before starting the assessment.
 
 ### Triage Categories
 
@@ -123,10 +134,6 @@ At the end of the assessment, you will see the triage category displayed promine
 | **EXPECTANT** | Black | Unsurvivable injury given available resources | Comfort care only |
 | **DECEASED** | Grey | No signs of life | Document and move on |
 
-### Reassessment
-
-Triage categories must be reassessed at every transition point: scene → Casualty Collection Point, CCP → transport, and transport → ED. To reassess a casualty, open their record from the casualty list and click **Add Event**, selecting the appropriate event type. Then return to the Triage page and add a new triage assessment for that casualty — each reassessment is recorded as a separate entry and never overwrites the original.
-
 ---
 
 ## 4. Patient Tracking Board
@@ -135,22 +142,11 @@ The Patient Tracking Board provides a real-time view of all casualties registere
 
 ### Reading the Board
 
-Each row in the tracking table represents one casualty. The columns show the provisional ID (e.g., `MCI-2026-ALPHA1-T0042`), current triage category, name (if identity has been confirmed), estimated age and sex, current disposition, and current location.
-
-The **Disposition** column indicates where the patient is in the care pathway:
-
-| Disposition | Meaning |
-|---|---|
-| AT_SCENE | Still at the incident scene |
-| IN_TRANSPORT | En route to a facility |
-| AT_FACILITY | Receiving care at a hospital |
-| DISCHARGED | Discharged from care |
-| TRANSFERRED | Transferred to another facility |
-| DECEASED | Deceased |
+Each row shows the provisional ID, current triage category, name (if identity confirmed), estimated age and sex, current disposition, and current location.
 
 ### Filtering the Board
 
-Use the triage category filter buttons at the top of the board to focus on a specific category (e.g., show only IMMEDIATE patients). You can also search by provisional ID or patient name using the search box.
+Use the triage category filter buttons at the top to focus on a specific category. Search by provisional ID or patient name using the search box.
 
 ### Viewing a Casualty's Timeline
 
@@ -158,31 +154,25 @@ Click the arrow (→) at the end of any row to open the **Casualty Detail** page
 
 ### Adding a Tracking Event
 
-On the Casualty Detail page, click **Add Event** to record a new tracking event. Select the event type from the dropdown (e.g., `ARRIVED_FACILITY`, `TO_OR`, `DISCHARGED`) and enter the location and any relevant notes. The event is appended to the timeline immediately.
+On the Casualty Detail page, click **Add Event** to record a new tracking event. Select the event type (e.g., `ARRIVED_FACILITY`, `TO_OR`, `DISCHARGED`) and enter the location and any relevant notes.
 
 ### Confirming a Patient's Identity
 
-When a patient's civil identity is established (via civil ID, passport, or family identification), click **Confirm Identity** on the Casualty Detail page. Enter the first name, last name, and national ID number. The provisional ID is retained as a secondary identifier and the identity confirmation is logged in the audit trail.
+When a patient's civil identity is established, click **Confirm Identity** on the Casualty Detail page. Enter the first name, last name, and national ID number. The provisional ID is retained as a secondary identifier.
 
 ---
 
 ## 5. Hospital Command Dashboard
 
-The Command Dashboard provides a real-time overview of the incident using the **CO-S-TR** framework — Command, Staff/Stuff/Space, Triage/Treatment/Tracking/Transport.
+The Command Dashboard provides a real-time overview using the **CO-S-TR** framework.
 
-### Dashboard Tiles
-
-**Triage Tally** shows the current count of casualties in each category (Immediate, Delayed, Minimal, Expectant, Deceased) for the selected incident. This updates automatically every 30 seconds.
+**Triage Tally** shows the current count of casualties in each category for the selected incident, updating every 30 seconds.
 
 **OR Queue** shows the number of surgical cases currently active in the operating theatre and the number awaiting scheduling.
 
-**Active Incidents** shows the count of incidents currently in ACTIVATED or ESCALATED status across all facilities.
+**Active Incidents** shows the count of incidents currently in ACTIVATED or ESCALATED status.
 
-**Quick Actions** provides one-click navigation to the most frequently used modules during an incident: Declare Incident, Register Casualty, OR Queue, Resources, ICS Forms, and After-Action Review.
-
-### Selecting an Incident for Detail
-
-From the Incidents page, click any incident to open its detail view. The incident detail page shows the live triage tally for that specific incident, quick navigation to all related modules (Triage, Tracking, OR Queue, Transport, ICS Forms, Communications), and the incident's status with a dropdown to transition it through the lifecycle.
+**Quick Actions** provides one-click navigation to the most frequently used modules during an incident.
 
 ---
 
@@ -192,27 +182,23 @@ The OR Queue module manages surgical case prioritisation and tracks each case th
 
 ### Understanding the State Machine
 
-Every surgical case follows a defined sequence of states. You advance a case to the next state by clicking the transition button on the case card. The sequence is:
+Every surgical case follows a defined sequence of states:
 
 **PROPOSED → SCHEDULED → IN_OR_PREP → INDUCTION → INCISION → CLOSURE → IN_PACU → OUT_PACU → COMPLETE**
 
-Cases can also be **CANCELLED** (from PROPOSED or SCHEDULED) or **ABORTED** (from IN_OR_PREP through CLOSURE). These are terminal states — a case cannot be reactivated once cancelled or aborted.
+Cases can also be **CANCELLED** (from PROPOSED or SCHEDULED) or **ABORTED** (from IN_OR_PREP through CLOSURE).
 
 ### Creating a New OR Case
 
-Click **New OR Case** and enter the casualty ID, procedure type, priority score (1–100, where 100 is most urgent), estimated duration, and blood type. Check the **Damage Control Surgery (DCS)** box if this is an abbreviated damage-control procedure — this flags the case for the surgical team and influences scheduling priority.
+Click **New OR Case** and enter the casualty ID, procedure type, priority score (1–100, where 100 is most urgent), estimated duration, and blood type. Check the **Damage Control Surgery (DCS)** box if this is an abbreviated damage-control procedure.
 
 ### Priority Scoring
 
-Priority is a number from 1 to 100. As a guide: IMMEDIATE casualties with penetrating chest or abdominal trauma typically score 85–100. IMMEDIATE casualties with extremity injuries or burns typically score 60–80. DELAYED casualties typically score 40–60.
+Priority is a number from 1 to 100. IMMEDIATE casualties with penetrating chest or abdominal trauma typically score 85–100. IMMEDIATE casualties with extremity injuries or burns typically score 60–80. DELAYED casualties typically score 40–60.
 
 ### Blood Products and MTP
 
-If a Massive Transfusion Protocol (MTP) is activated for a case, check the **MTP Active** checkbox and update the units of packed red blood cells (pRBC), fresh frozen plasma (FFP), and platelets used as the case progresses. The standard 1:1:1 ratio (1 unit pRBC : 1 unit FFP : 1 unit platelets) is the default guideline.
-
-### Filtering the Queue
-
-Use the status filter buttons to view cases by state. The **Active** filter (default) shows all cases that are currently in progress or awaiting the OR. The **All** filter shows the complete history including completed and cancelled cases.
+If a Massive Transfusion Protocol (MTP) is activated, check the **MTP Active** checkbox and update the units of packed red blood cells (pRBC), fresh frozen plasma (FFP), and platelets used as the case progresses. The standard 1:1:1 ratio is the default guideline.
 
 ---
 
@@ -222,41 +208,31 @@ The Resources module provides real-time inventory of all critical resources acro
 
 ### Reading the Inventory
 
-Resources are grouped by category: Critical Care (ventilators, ICU beds, ECMO), Surgical (OR rooms, CT, C-arm, MRI), Ward beds, Blood Products, PPE, and Medications. Each resource card shows the total count, the number currently in use (red), and the number available (green), along with a utilisation percentage bar.
+Resources are grouped by category: Critical Care, Surgical, Ward beds, Blood Products, PPE, and Medications. Each resource card shows the total count, the number in use (red), and the number available (green), along with a utilisation percentage bar.
 
 A **yellow warning icon** (⚠) appears on any resource card where the available count has fallen to or below the configured low-threshold alert level.
 
 ### Updating Resource Counts
 
-Click any resource card to open the edit form. Update the Total, In Use, Available, and In Maintenance counts to reflect the current situation. Changes take effect immediately and are visible to all users on the platform.
-
-### Adding a New Resource
-
-Click **Add Resource**, select the resource type from the dropdown, give it a descriptive name (e.g., "ICU Ventilator Bay A"), and enter the initial counts. Set a **Low Alert Threshold** to receive a visual warning when available units fall to that level.
+Click any resource card to open the edit form. Update the Total, In Use, Available, and In Maintenance counts to reflect the current situation.
 
 ---
 
 ## 8. Transport Management
 
-The Transport module tracks all patient transport assets (ambulances, helicopters, fixed-wing aircraft) assigned to an incident.
+The Transport module tracks all patient transport assets assigned to an incident.
 
 ### Transport Status Flow
 
-Each transport asset moves through the following status sequence:
-
 **AVAILABLE → DISPATCHED → EN_ROUTE → AT_SCENE → LOADED → RETURNING → AVAILABLE**
 
-Use the action buttons on each transport card to advance the status as the vehicle moves through its mission. The status is visible to all users and feeds into the transport queue count on the Command Dashboard.
-
-### Creating a Transport Record
-
-Click **Add Transport**, select the vehicle type, enter the driver or crew name, and set the estimated time of arrival (ETA) in minutes. The transport is created with AVAILABLE status and can be dispatched immediately.
+Use the action buttons on each transport card to advance the status as the vehicle moves through its mission.
 
 ---
 
 ## 9. ICS Forms
 
-The ICS Forms module provides digital versions of the standard Hospital Incident Command System (HICS) forms required during a declared incident.
+The ICS Forms module provides digital versions of the standard Hospital Incident Command System (HICS) forms.
 
 ### Available Forms
 
@@ -269,15 +245,11 @@ The ICS Forms module provides digital versions of the standard Hospital Incident
 | **HICS 205A** | Communications List — radio and phone assignments |
 | **HICS 213** | General Message — inter-section communications |
 | **HICS 214** | Activity Log — chronological record of actions |
-| **HICS 254** | Disaster Victim/Patient Tracking — auto-populated from the Tracking module |
+| **HICS 254** | Disaster Victim/Patient Tracking |
 
 ### Submitting a Form
 
-Select the incident, click the form type button (e.g., **HICS 213**), fill in the required fields, and click **Submit Form**. Submitted forms appear in the form history list with a SUBMITTED status. The recipient or section chief can click **Acknowledge** to confirm receipt.
-
-### Acknowledging a Form
-
-When you receive a HICS 213 General Message or other form requiring acknowledgement, find it in the form list (it will show SUBMITTED status) and click **Acknowledge**. The form status changes to ACKNOWLEDGED and the submission time is recorded.
+Select the incident, click the form type button, fill in the required fields, and click **Submit Form**. The recipient can click **Acknowledge** to confirm receipt.
 
 ---
 
@@ -286,8 +258,6 @@ When you receive a HICS 213 General Message or other form requiring acknowledgem
 The Communications module provides incident-scoped messaging organised by operational channel.
 
 ### Channels
-
-Messages are organised into five channels, each corresponding to an ICS section:
 
 | Channel | Used by |
 |---|---|
@@ -299,15 +269,7 @@ Messages are organised into five channels, each corresponding to an ICS section:
 
 ### Message Priority
 
-Every message has a priority level. **ROUTINE** messages appear in the standard message list. **URGENT** messages are highlighted in orange. **FLASH** messages are highlighted in red and require explicit acknowledgement by the recipient.
-
-### Sending a Message
-
-Select the incident and channel, choose the priority level, type your message, and press **Enter** or click the send button. Messages are visible to all users with access to that incident.
-
-### Acknowledging URGENT and FLASH Messages
-
-URGENT and FLASH messages display a green checkmark button. Click it to acknowledge receipt. The acknowledgement timestamp is recorded and visible to the sender.
+**ROUTINE** messages appear in the standard list. **URGENT** messages are highlighted in orange. **FLASH** messages are highlighted in red and require explicit acknowledgement.
 
 ---
 
@@ -317,17 +279,7 @@ The WHO Emergency Medical Team Minimum Data Set (EMT MDS) module is used by depl
 
 ### Completing a Daily Report
 
-Select the incident and click **New Report**. The form covers the four WHO EMT MDS categories:
-
-**Team Information** — your organisation name and EMT classification (EMT-1, EMT-2, or EMT-3).
-
-**Daily Summary** — total consultations, new admissions, total bed capacity, and other summary statistics for the reporting period.
-
-**MDS Statistics** — detailed breakdown by health event type (trauma, infectious disease, emergency, other), procedures performed, and patient outcomes (deaths, discharges, referrals).
-
-**Needs and Risks** — operational constraints, community health risks, and resource needs for the next reporting period.
-
-Click **Submit Report** to record the report. Submitted reports can be exported for transmission to the WHO EMTCC gateway or the relevant national health authority endpoint.
+Select the incident and click **New Report**. The form covers four categories: Team Information, Daily Summary, MDS Statistics, and Needs and Risks. Click **Submit Report** to record the report.
 
 ---
 
@@ -337,7 +289,7 @@ The After-Action Review (AAR) module provides a structured analysis of incident 
 
 ### Viewing KPIs
 
-Select any incident from the dropdown (including closed incidents) to view its KPI dashboard. The following metrics are displayed:
+Select any incident from the dropdown (including closed incidents) to view its KPI dashboard.
 
 | KPI | Description |
 |---|---|
@@ -349,52 +301,82 @@ Select any incident from the dropdown (including closed incidents) to view its K
 | **Identity Confirmed** | Casualties whose civil identity was confirmed |
 | **Incident Duration** | Time from activation to closure |
 
-### Using the AAR for Learning
-
-The AAR data should be reviewed in a structured debrief with all participating teams. Key questions to address include: Were triage categories appropriate (over-triage and under-triage rates)? Were OR cases prioritised correctly? Were resources sufficient? Were communications timely and acknowledged? Were all casualties' identities confirmed before discharge?
-
 ---
 
 ## 13. Family Reunification Portal
 
-The Family Reunification Portal is a **publicly accessible** page that allows family members to enquire about the status of a loved one involved in a mass casualty incident. It is accessible from the main platform page without signing in.
-
-### What Information is Available
-
-The portal shows only the patient's general status category (e.g., "Receiving Treatment", "Discharged", "Transferred"). No names, injuries, diagnoses, or other personal health information are displayed. This is by design to protect patient privacy in accordance with applicable data protection regulations including HIPAA and GDPR.
-
-### How to Search
-
-Family members enter the patient's civil ID number or provisional triage tag number (if known) and submit the search. If a match is found, the status is displayed. If no match is found, the family member is directed to call the emergency helpline (112).
+The Family Reunification Portal is a **publicly accessible** page that allows family members to enquire about the status of a loved one without signing in. It shows only the patient's general status category — no names, injuries, diagnoses, or other personal health information are displayed.
 
 ---
 
-## 14. Frequently Asked Questions
+## 14. Admin Panel
+
+The Admin Panel (`/admin`) is accessible to **Admin** and **Super Admin** roles.
+
+### Users Tab
+
+The Users tab lists all platform users. Click the **edit (pencil) icon** on any row to open the full profile editor, which allows you to update:
+
+- Full name and email address
+- Job title and phone number
+- Role and preferred language
+- Facility assignment
+- Active / Inactive status
+
+From the edit dialog you can also:
+
+- **Set Password** — immediately replace the user's password
+- **Delete User** (Super Admin only) — permanently remove the user account with a confirmation prompt
+
+To add a new user directly (without an invite), click **Add User** (Super Admin only). The user will still need an invite link to set their password and sign in for the first time.
+
+### Invitations Tab
+
+Send invitation links, view all invitations with their status, revoke pending invitations, and resend/extend expired ones.
+
+### Access Requests Tab
+
+Review requests submitted via the landing page. Each request shows the requester's name, email, job title, hospital, and reason. Click **Send Invite** to open the invitation form pre-filled with their email, or **Reject** to decline.
+
+### Facilities Tab
+
+Create and edit hospital/facility records including name (English and Arabic), code, type, city, phone, and capacity figures (total beds, ICU beds, OR rooms, ventilators).
+
+### Audit Log Tab
+
+Chronological record of all significant actions with user, action type, resource, and IP address.
+
+---
+
+## 15. Frequently Asked Questions
 
 **Q: I cannot see the Incidents module. What is wrong?**  
-A: Your role may be set to Viewer, which has read-only dashboard access. Contact your administrator to have your role updated to Clinician, Triage Officer, or Incident Commander as appropriate.
+A: Your role may be set to Viewer, which has read-only dashboard access. Contact your administrator to have your role updated.
+
+**Q: I forgot my password. What do I do?**  
+A: Go to `/login` and click **Forgot password?**. Enter your email address and submit. Your administrator will receive a notification with a reset link and will forward it to you. Open the link, set a new password, and you will be signed in automatically.
 
 **Q: I accidentally entered the wrong triage category. Can I change it?**  
-A: Triage assessments are immutable by design — they cannot be edited or deleted. This preserves the integrity of the clinical record. To correct a category, perform a reassessment by adding a new triage assessment for the same casualty. The most recent assessment is used as the current category.
+A: Triage assessments are immutable by design. To correct a category, perform a reassessment by adding a new triage assessment for the same casualty. The most recent assessment is used as the current category.
 
 **Q: The tracking board is not updating. What should I do?**  
-A: The board refreshes automatically every 20 seconds. If it appears stale, click the **Refresh** button (↺) at the top of the page. If the problem persists, check your internet connection and reload the page.
+A: The board refreshes automatically every 20 seconds. Click the **Refresh** button (↺) at the top of the page. If the problem persists, check your internet connection and reload the page.
 
 **Q: A patient's identity has been confirmed but the system still shows the provisional ID.**  
-A: The provisional ID is always retained as a secondary identifier even after identity confirmation. This is intentional — the provisional ID is printed on the physical triage tag and must remain traceable. The patient's confirmed name will appear alongside the provisional ID on all screens.
-
-**Q: I need to transfer a patient to another hospital. What do I do?**  
-A: First, create a transport record in the **Transport** module for the receiving vehicle. Then, on the patient's Casualty Detail page, add a `LOADED_TRANSPORT` event with the transport ID and destination facility. When the patient arrives, add an `ARRIVED_FACILITY` event. This creates the complete transfer record in the tracking log.
+A: The provisional ID is always retained as a secondary identifier even after identity confirmation. This is intentional — the provisional ID is printed on the physical triage tag and must remain traceable.
 
 **Q: How do I declare a new incident?**  
-A: Navigate to **Incidents** and click **Declare Incident**. You will need Incident Commander or Admin role to do this. Enter the incident name (in English and optionally Arabic), type, severity, location, and estimated casualty count. The incident is activated immediately upon creation.
+A: Navigate to **Incidents** and click **Declare Incident**. You will need Incident Commander or Admin role. Enter the incident name, type, severity, location, and estimated casualty count.
 
 **Q: Can I use the platform on my phone?**  
-A: Yes. The platform is fully responsive and works on mobile browsers. The sidebar collapses to a hamburger menu on small screens. For triage work in the field, the large touch-target buttons on the SALT assessment screen are specifically designed for use with gloves.
+A: Yes. The platform is fully responsive and works on mobile browsers. The sidebar collapses to a hamburger menu on small screens.
+
+**Q: I want to show the platform to someone without giving them an account. Is there a demo?**  
+A: Yes. Share the link `{platform-url}/demo` — it is a fully interactive, read-only showcase of all 11 modules with sample data. No login is required.
 
 ---
 
-## 15. Quick Reference Card
+## 16. Quick Reference Card
 
 ### Triage Category Colours
 
@@ -406,12 +388,16 @@ A: Yes. The platform is fully responsive and works on mobile browsers. The sideb
 | ⬛ Black | EXPECTANT | Comfort care only — unsurvivable |
 | ⬜ Grey | DECEASED | Document and move on |
 
-### Key Keyboard Shortcuts
+### Key URLs
 
-| Action | Shortcut |
+| URL | Purpose |
 |---|---|
-| Send message in Communications | Enter |
-| New line in message | Shift + Enter |
+| `/login` | Sign in with email and password |
+| `/forgot-password` | Request a password reset |
+| `/invite/:token` | Accept an invitation and create your account |
+| `/demo` | Interactive demo — no login required |
+| `/public-portal` | Family reunification portal |
+| `/admin` | Admin panel (admin roles only) |
 
 ### Emergency Contacts
 
@@ -422,7 +408,7 @@ A: Yes. The platform is fully responsive and works on mobile browsers. The sideb
 
 ---
 
-*This guide covers platform version 1.0. For the most current version, refer to the platform's built-in help or contact your administrator.*
+*This guide covers platform version 1.1. For the most current version, refer to the platform's built-in help or contact your administrator.*
 
 *Saud's MCI Platform*  
 *© 2026 Saud Naji Alzaid — MIT License*
