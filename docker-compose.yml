@@ -1,62 +1,82 @@
-version: "3.9"
+# ─────────────────────────────────────────────────────────────────────────────
+# Saud's MCI Platform — docker-compose.yml
+#
+# Usage:
+#   1. Copy .env.example to .env and fill in the required values.
+#   2. docker compose up -d
+#   3. Open http://localhost:3000
+#
+# To rebuild after code changes:
+#   docker compose up -d --build
+# ─────────────────────────────────────────────────────────────────────────────
 
 services:
-  # ── Application ──────────────────────────────────────────────────────────────
+
+  # ── MySQL database ──────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-mci_root_secret}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-mci_platform}
+      MYSQL_USER: ${MYSQL_USER:-mci_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-mci_password}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-mci_root_secret}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    networks:
+      - mci_net
+
+  # ── MCI Platform app ────────────────────────────────────────────────────────
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: mci-platform
     restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: production
-      DATABASE_URL: mysql://mci_user:${MYSQL_PASSWORD:-changeme}@db:3306/mci_platform
-      JWT_SECRET: ${JWT_SECRET:-change-this-secret-in-production-min-32-chars}
-      # Manus OAuth (required for OAuth fallback; can be left blank if using email/password only)
-      VITE_APP_ID: ${VITE_APP_ID:-}
-      OAUTH_SERVER_URL: ${OAUTH_SERVER_URL:-}
-      VITE_OAUTH_PORTAL_URL: ${VITE_OAUTH_PORTAL_URL:-}
-      BUILT_IN_FORGE_API_KEY: ${BUILT_IN_FORGE_API_KEY:-}
-      BUILT_IN_FORGE_API_URL: ${BUILT_IN_FORGE_API_URL:-}
-      VITE_FRONTEND_FORGE_API_KEY: ${VITE_FRONTEND_FORGE_API_KEY:-}
-      VITE_FRONTEND_FORGE_API_URL: ${VITE_FRONTEND_FORGE_API_URL:-}
-      OWNER_OPEN_ID: ${OWNER_OPEN_ID:-}
-      OWNER_NAME: ${OWNER_NAME:-}
     depends_on:
       db:
         condition: service_healthy
-    networks:
-      - mci-net
-
-  # ── Database ──────────────────────────────────────────────────────────────────
-  db:
-    image: mysql:8.0
-    container_name: mci-db
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: mci_platform
-      MYSQL_USER: mci_user
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-changeme}
-    volumes:
-      - mci-db-data:/var/lib/mysql
     ports:
-      - "3306:3306"
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "mci_user", "-p${MYSQL_PASSWORD:-changeme}"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+
+      # ── Database ─────────────────────────────────────────────────────────────
+      DATABASE_URL: mysql://${MYSQL_USER:-mci_user}:${MYSQL_PASSWORD:-mci_password}@db:3306/${MYSQL_DATABASE:-mci_platform}
+
+      # ── Auth (REQUIRED — generate a strong random string) ────────────────────
+      JWT_SECRET: ${JWT_SECRET}
+
+      # ── Manus OAuth (optional — leave blank to use custom auth only) ─────────
+      VITE_APP_ID: ${VITE_APP_ID:-}
+      OAUTH_SERVER_URL: ${OAUTH_SERVER_URL:-}
+      VITE_OAUTH_PORTAL_URL: ${VITE_OAUTH_PORTAL_URL:-}
+      OWNER_OPEN_ID: ${OWNER_OPEN_ID:-}
+      OWNER_NAME: ${OWNER_NAME:-}
+
+      # ── Manus Forge API (optional — for LLM/storage features) ────────────────
+      BUILT_IN_FORGE_API_URL: ${BUILT_IN_FORGE_API_URL:-}
+      BUILT_IN_FORGE_API_KEY: ${BUILT_IN_FORGE_API_KEY:-}
+      VITE_FRONTEND_FORGE_API_KEY: ${VITE_FRONTEND_FORGE_API_KEY:-}
+      VITE_FRONTEND_FORGE_API_URL: ${VITE_FRONTEND_FORGE_API_URL:-}
+
+      # ── Analytics (optional) ─────────────────────────────────────────────────
+      VITE_ANALYTICS_ENDPOINT: ${VITE_ANALYTICS_ENDPOINT:-}
+      VITE_ANALYTICS_WEBSITE_ID: ${VITE_ANALYTICS_WEBSITE_ID:-}
+
     networks:
-      - mci-net
+      - mci_net
 
 volumes:
-  mci-db-data:
+  mysql_data:
     driver: local
 
 networks:
-  mci-net:
+  mci_net:
     driver: bridge
