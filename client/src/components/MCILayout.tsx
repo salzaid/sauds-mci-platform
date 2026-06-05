@@ -11,8 +11,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   LayoutDashboard, AlertTriangle, Activity, Users, Stethoscope,
   Truck, FileText, BarChart3, Radio, Settings, Globe, Menu, X,
-  LogOut, User, ChevronRight, Syringe, Package, ClipboardList, Lock
+  LogOut, User, ChevronRight, Syringe, Package, ClipboardList, Lock, KeyRound
 } from "lucide-react";
+import ChangePasswordDialog from "./ChangePasswordDialog";
 
 const navItems = [
   { key: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -41,6 +42,7 @@ export default function MCILayout({ children }: MCILayoutProps) {
   const { t, lang, setLang, dir } = useLang();
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   if (loading) {
     return (
@@ -64,12 +66,17 @@ export default function MCILayout({ children }: MCILayoutProps) {
           </div>
           <p className="text-muted-foreground text-sm">منصة سعود للكوارث الطبية</p>
         </div>
-        <div className="flex items-center gap-3 px-5 py-4 bg-muted/60 border border-border rounded-xl max-w-sm w-full">
-          <Lock className="h-5 w-5 text-muted-foreground shrink-0" />
-          <div>
-            <p className="text-sm font-medium">Invite-only access</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Contact your administrator to receive an invitation link.</p>
+        <div className="space-y-3 w-full max-w-sm">
+          <div className="flex items-start gap-3 px-5 py-4 bg-muted/60 border border-border rounded-xl">
+            <Lock className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium">Invite-only access</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Use your invitation link to create an account, or sign in if you already have one.</p>
+            </div>
           </div>
+          <Button className="w-full" asChild>
+            <a href="/login">Sign In</a>
+          </Button>
         </div>
       </div>
     );
@@ -150,6 +157,11 @@ export default function MCILayout({ children }: MCILayoutProps) {
               {lang === "en" ? "العربية" : "English"}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setShowChangePassword(true)}>
+              <KeyRound className="h-4 w-4 mr-2" />
+              Change Password
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => { void logout(); }} className="text-destructive">
               <LogOut className="h-4 w-4 mr-2" />
               {t("common.logout")}
@@ -198,6 +210,7 @@ export default function MCILayout({ children }: MCILayoutProps) {
           {children}
         </main>
       </div>
+      <ChangePasswordDialog open={showChangePassword} onOpenChange={setShowChangePassword} />
     </div>
   );
 }

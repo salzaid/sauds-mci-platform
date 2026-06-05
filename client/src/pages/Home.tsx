@@ -76,6 +76,9 @@ export default function Home() {
             </div>
 
             <div className="flex gap-3 flex-wrap">
+              <Button asChild>
+                <a href="/login">Sign In</a>
+              </Button>
               <Button variant="outline" onClick={() => setShowForm(v => !v)}>
                 {showForm ? "Hide form" : "Request Access"}
               </Button>

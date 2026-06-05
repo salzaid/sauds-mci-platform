@@ -14,6 +14,7 @@ import { adminRouter } from "./routers/admin";
 import { dashboardRouter } from "./routers/dashboard";
 import { invitationsRouter } from "./routers/invitations";
 import { demoRouter } from "./routers/demo";
+import { customAuthRouter } from "./routers/customAuth";
 
 export const appRouter = router({
   system: systemRouter,
@@ -37,6 +38,7 @@ export const appRouter = router({
   dashboard: dashboardRouter,
   invitations: invitationsRouter,
   demo: demoRouter,
+  customAuth: customAuthRouter,
 });
 
 export type AppRouter = typeof appRouter;

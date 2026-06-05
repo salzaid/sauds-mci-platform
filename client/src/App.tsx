@@ -23,6 +23,10 @@ import Comms from "./pages/Comms";
 import AdminPanel from "./pages/AdminPanel";
 import PublicPortal from "./pages/PublicPortal";
 import InvitePage from "./pages/InvitePage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import DemoHome from "./pages/demo/DemoHome";
 import DemoLayout from "./components/DemoLayout";
 import {
@@ -100,7 +104,18 @@ function Router() {
         <DemoLayout><DemoPublicPortal /></DemoLayout>
       </Route>
 
+      <Route path="/login" component={LoginPage} />
+      <Route path="/forgot-password" component={ForgotPasswordPage} />
+      <Route path="/reset-password">
+        {() => {
+          const token = new URLSearchParams(window.location.search).get("token") ?? "";
+          return <ResetPasswordPage token={token} />;
+        }}
+      </Route>
       <Route path="/invite/:token">
+        {(params) => <RegisterPage token={params.token} />}
+      </Route>
+      <Route path="/invite-manus/:token">
         {(params) => <InvitePage token={params.token} />}
       </Route>
 
