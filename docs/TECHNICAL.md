@@ -382,6 +382,21 @@ Key characteristics of the Docker deployment:
 
 For a Kubernetes deployment, the same image can be used with a `Deployment` + `Service` manifest, with the database provided by a managed RDS/Cloud SQL instance or a MySQL `StatefulSet`.
 
+### CI / CD Pipeline
+
+The repository ships with two GitHub Actions workflows in `.github/workflows/`:
+
+**`ci.yml`** — Runs on every push to `main` and every pull request. Executes `tsc --noEmit` (TypeScript type check) and `pnpm test` (Vitest unit tests). A failing check blocks the PR from merging. Uses the built-in `GITHUB_TOKEN`; no additional secrets required.
+
+**`docker-publish.yml`** — Runs on every push to `main` and on semantic version tags (`v*.*.*`). Builds the Docker image using GitHub Actions cache (significantly reduces build time on subsequent runs) and pushes it to GitHub Container Registry:
+
+```
+ghcr.io/salzaid/sauds-mci-platform:latest   ← pushed on every main merge
+ghcr.io/salzaid/sauds-mci-platform:1.0.0    ← pushed on tag v1.0.0
+```
+
+The image is publicly pullable without authentication. Pull requests trigger a build but do not push, preventing untrusted code from publishing images.
+
 ### Tactical Edge (Future)
 
 A planned v3 capability will support a minimal single-node deployment on ARM devices for ambulance and field tent use, with offline-first operation and delta sync when connectivity is restored.

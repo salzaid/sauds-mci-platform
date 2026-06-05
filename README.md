@@ -124,9 +124,47 @@ This platform is designed to run on [Manus](https://manus.im) with zero-configur
 
 Manus provides built-in hosting with custom domain support, automatic SSL, a managed MySQL database, and OAuth integration. No additional infrastructure is required.
 
+### CI / CD & Pre-Built Docker Image
+
+The repository includes two GitHub Actions workflows that run automatically on every push to `main`:
+
+| Workflow | File | Trigger | What it does |
+|---|---|---|---|
+| **CI** | `.github/workflows/ci.yml` | Push / PR to `main` | Runs TypeScript type check and all 61 unit tests. Blocks merging if either fails. |
+| **Docker Publish** | `.github/workflows/docker-publish.yml` | Push to `main` or version tag (`v*.*.*`) | Builds the Docker image and pushes it to GitHub Container Registry. |
+
+Both workflows use the built-in `GITHUB_TOKEN` — **no extra secrets or configuration needed**.
+
+#### Pre-built image
+
+After the first push to `main` triggers the workflow, the image is available at:
+
+```bash
+docker pull ghcr.io/salzaid/sauds-mci-platform:latest
+```
+
+Version tags produce additional pinned tags:
+
+```bash
+docker pull ghcr.io/salzaid/sauds-mci-platform:1.0.0
+docker pull ghcr.io/salzaid/sauds-mci-platform:1.0
+docker pull ghcr.io/salzaid/sauds-mci-platform:1
+```
+
+Using the pre-built image in `docker-compose.yml` (replace the `build:` block):
+
+```yaml
+services:
+  app:
+    image: ghcr.io/salzaid/sauds-mci-platform:latest
+    # remove the build: block when using the pre-built image
+```
+
+---
+
 ### Self-Hosted Deployment
 
-For on-premises or cloud deployments (e.g., organisations with data-residency requirements). The repository ships with a `Dockerfile` and `docker-compose.yml`.
+For on-premises or cloud deployments (e.g., organisations with data-residency requirements). The repository ships with a `Dockerfile`, `docker-compose.yml`, and `.env.example`.
 
 #### Option A — Docker Compose (Recommended — includes MySQL)
 
