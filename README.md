@@ -320,6 +320,26 @@ The demo uses a dedicated read-only tRPC router (`demoRouter`) — no mutations 
 
 ---
 
+## Demo Accounts
+
+The following accounts are pre-loaded for testing and demonstration purposes. All accounts use the password `Demo@1234` and can be managed from **Admin → Users**.
+
+Sign in at `/login`.
+
+| Role | Email | Password | Job Title |
+|---|---|---|---|
+| **Super Admin** | `superadmin@demo.mci` | `Demo@1234` | Super Administrator |
+| **Admin** | `admin@demo.mci` | `Demo@1234` | Platform Administrator |
+| **Incident Commander** | `commander@demo.mci` | `Demo@1234` | Incident Commander |
+| **Clinician** | `clinician@demo.mci` | `Demo@1234` | Emergency Physician |
+| **Triage Officer** | `triage@demo.mci` | `Demo@1234` | Senior Triage Nurse |
+| **Logistics** | `logistics@demo.mci` | `Demo@1234` | Logistics Section Chief |
+| **Viewer** | `viewer@demo.mci` | `Demo@1234` | Observer / Trainee |
+
+> **Note:** These are demonstration accounts. Change or remove them before deploying to a production environment.
+
+---
+
 ## Standards Compliance
 
 | Standard | Application |
