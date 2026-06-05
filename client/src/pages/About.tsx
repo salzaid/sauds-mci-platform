@@ -3,7 +3,7 @@ import { useLang } from "@/contexts/LanguageContext";
 import {
   AlertTriangle, Github, Heart, Stethoscope, Shield, Activity,
   Users, Truck, FileText, BarChart3, Radio, ClipboardList, Globe,
-  ArrowLeft, ExternalLink
+  ArrowLeft, ExternalLink, Linkedin
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -89,10 +89,10 @@ export default function About() {
                 Recent events made it clear that the gap between internationally recognised MCI standards and the tools available on the ground was unacceptably wide — with no viable open-source model available. Hospital incident command systems existed on paper. Triage algorithms were taught in courses but rarely practised in a digital environment. After-action reviews were conducted from memory.
               </p>
               <p>
-                I built this platform to close that gap. Not as an academic exercise, but as a practical tool that a triage officer can use with gloves on, that an incident commander can rely on at 3am, and that a logistics coordinator can use to know — in real time — that the team has what they need when they need it.
+                This platform is built to close that gap. Not as an academic exercise, but as a practical tool that a triage officer can use with gloves on, that an incident commander can rely on at 3am, and that a logistics coordinator can use to know — in real time — that the team has what they need when they need it. Although it started as a solo vibe coding project, I've been lucky enough to have engineers and innovators as well as fellow physicians reach out and contribute.
               </p>
               <p>
-                The platform is aligned with SALT, HICS, CO-S-TR, WHO EMT MDS, and HL7 FHIR R4/R5 because those are the standards that the international emergency medicine and disaster response community has converged on. They are not perfect, but they are shared — and shared standards save lives when hospitals from different systems have to work together.
+                The platform is aligned with SALT, HICS, CO-S-TR, WHO EMT MDS, and HL7 FHIR R4/R5 because those are the standards that the international emergency medicine and disaster response community has converged on. They are not perfect, but they are shared — and shared standards save lives when hospitals from different systems have to work together. My hope is that it grows out of the community — and the first priority is to come up with a better name!
               </p>
             </div>
           </div>
@@ -121,13 +121,13 @@ export default function About() {
               </div>
               <div className="mt-4 pt-4 border-t border-border">
                 <a
-                  href="https://github.com/salzaid"
+                  href="https://www.linkedin.com/in/saud-n-alzaid-a10538102/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <Github className="h-4 w-4" />
-                  github.com/salzaid
+                  <Linkedin className="h-4 w-4" />
+                  LinkedIn
                   <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
