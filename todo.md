@@ -1,132 +1,119 @@
-# MCI & Disaster Management Platform — TODO
+# Saud's MCI Platform — Project TODO
 
-## Phase 1: Foundation & Schema
-- [x] Database schema: users extended with facility, role, profile fields
-- [x] Database schema: facilities (hospitals)
-- [x] Database schema: incidents
-- [x] Database schema: casualties
-- [x] Database schema: casualty_events (tracking log)
-- [x] Database schema: triage_assessments
-- [x] Database schema: or_cases (surgical queue)
-- [x] Database schema: resources (ventilators, beds, OR rooms, blood products)
-- [x] Database schema: transports
-- [x] Database schema: ics_forms
-- [x] Database schema: emt_mds_reports
-- [x] Database schema: audit_logs
-- [x] Database schema: comms_messages
-- [x] Backend routers: incidents CRUD
-- [x] Backend routers: casualties CRUD + events
-- [x] Backend routers: triage CRUD
-- [x] Backend routers: or_cases CRUD + state machine
-- [x] Backend routers: resources CRUD
-- [x] Backend routers: transports CRUD
-- [x] Backend routers: ics_forms CRUD
-- [x] Backend routers: emt_mds CRUD
-- [x] Backend routers: audit_log read
-- [x] Backend routers: comms CRUD
-- [x] Backend routers: admin (users, facilities, roles)
-- [x] Backend routers: dashboard (aggregated stats)
-- [x] Backend routers: aar (after-action review)
+Last updated: 2026-06-05 | Version: 926ca743
 
-## Phase 2: Auth & Global Layout
-- [x] Project scaffold initialized
-- [x] Global CSS theme (dark command theme, MCI color palette)
-- [x] MCILayout with sidebar navigation (all 11 modules)
-- [x] Role-based route guards (admin, commander, clinician, triage, logistics)
-- [x] Login page (Home.tsx with MCI branding)
-- [x] Language switcher (EN/AR)
-- [x] i18n context and translations (EN + AR)
+---
 
-## Phase 3: Incident Management
-- [x] Incident list page (with status filters)
-- [x] Create incident form (type, location, estimated casualties)
-- [x] Incident detail page with status transitions
-- [x] Incident status badge (ACTIVATED/ESCALATED/DEACTIVATED/CLOSED)
+## Core Platform Modules
 
-## Phase 4: Scene Triage Module
-- [x] SALT triage decision tree (state machine)
-- [x] Triage capture form (large-touch-target UI)
-- [x] Triage category display (Immediate/Delayed/Minimal/Expectant/Deceased)
-- [x] Casualty registration with provisional ID generation
-- [x] Triage history / reassessment log
+- [x] Scene Triage — SALT, START, JumpSTART (paediatric) decision trees
+- [x] Patient Tracking — HICS 254-equivalent immutable event log
+- [x] Hospital Command Dashboard — CO-S-TR tiles (triage tally, OR queue, blood bank, ICU census)
+- [x] Incident Management — full lifecycle (ACTIVATED → ESCALATED → DEACTIVATED → CLOSED)
+- [x] OR / Surgical Queue — 11-state machine, DCS flag, MTP blood product tracking
+- [x] Resources & Logistics — real-time inventory (ventilators, ICU/OR beds, blood products, PPE, medications)
+- [x] Transport Management — inter-facility manifests and status tracking
+- [x] ICS Forms — HICS 201, 202, 203, 204, 205A, 213, 214, 254
+- [x] WHO EMT MDS Reporting — 85-item daily situation report
+- [x] Communications — incident-scoped messaging by channel and priority (ROUTINE / URGENT / FLASH)
+- [x] After-Action Review — KPI dashboard (mortality rate, OR throughput, identity confirmation rate)
+- [x] Public Family Reunification Portal — privacy-preserving status lookup (no PHI)
 
-## Phase 5: Patient Tracking Board (HICS 254)
-- [x] Casualty list per incident with triage category filters
-- [x] Casualty detail page with full timeline
-- [x] Tracking event append form (TAGGED, ARRIVED_CCP, LOADED_TRANSPORT, etc.)
-- [x] Identity reconciliation workflow
-- [x] Live tracking board (auto-refresh every 20s)
+---
 
-## Phase 6: Hospital Command Dashboard (CO-S-TR)
-- [x] Dashboard overview with stat tiles
-- [x] Casualty tally tile (Red/Yellow/Green/Black/Expectant)
-- [x] OR queue tile (cases awaiting OR)
-- [x] Active incidents list
-- [x] Quick actions panel
+## Authentication & Access Control
 
-## Phase 7: Resource & Logistics Module
-- [x] Resource inventory list (ventilators, OR rooms, ICU beds, blood products, PPE)
-- [x] Resource availability update form
-- [x] Low-threshold alerts
-- [x] Utilization progress bars
+- [x] Custom email/password authentication (bcrypt 12 rounds, JWT session cookies)
+- [x] HTTP-only, Secure, SameSite session cookies signed with JWT_SECRET
+- [x] Invite-only access model — no public self-registration
+- [x] Invite flow: admin creates invite → recipient sets password → account created → signed in
+- [x] 7-day expiring invite tokens (48-char nanoid)
+- [x] Invite resend / revoke from Admin panel
+- [x] Request Access form on landing page (notifies admin, logged to DB)
+- [x] Forgot password flow (reset token stored, admin-visible reset URL)
+- [x] Reset password page (/reset-password?token=...)
+- [x] Change password dialog (authenticated users, sidebar dropdown)
+- [x] Admin: set password for any user
+- [x] Manus OAuth fallback (backward compatible for existing OAuth users)
+- [x] Dual-auth context (custom JWT first, Manus OAuth fallback)
 
-## Phase 8: OR / Surgical Queue Module
-- [x] OR case list with priority scoring
-- [x] Create OR case form
-- [x] OR case state machine UI (full 11-state machine)
-- [x] Blood product allocation per case (MTP tracking)
-- [x] DCS (damage-control surgery) flag
+---
 
-## Phase 9: ICS Forms Module
-- [x] HICS 201-254 form types supported
-- [x] Form submission and acknowledgement workflow
-- [x] Form history list
+## Admin Panel
 
-## Phase 10: Transport / Inter-Facility Module
-- [x] Transport list per incident
-- [x] Transport creation form
-- [x] Status transitions (AVAILABLE → DISPATCHED → EN_ROUTE → AT_SCENE → LOADED → RETURNING)
+- [x] Users tab — search, list all users with role badges and status
+- [x] Full profile editing — name, email, job title, phone, role, language, facility, active status
+- [x] Set Password for any user (admin/superadmin)
+- [x] Delete User (superadmin only, cannot delete own account)
+- [x] Add User directly (superadmin only, no invite required)
+- [x] Invitations tab — send, view, revoke, resend/extend
+- [x] Access Requests tab — review, one-click Send Invite, reject, pending badge counter
+- [x] Facilities tab — create and edit hospital/facility records
+- [x] Audit Log tab — chronological record of all significant actions
+- [x] adminProcedure accepts both 'admin' and 'superadmin' roles
 
-## Phase 11: WHO EMT MDS Reporting
-- [x] EMT MDS daily report form (key items)
-- [x] Report history list
-- [x] Export button (UI)
+---
 
-## Phase 12: After-Action Review (AAR)
-- [x] KPI dashboard (total casualties, mortality rate, OR completed, identity confirmed)
-- [x] Incident duration and timeline
-- [x] KPI export button (UI)
+## Demo & Testing
 
-## Phase 13: Public Family Reunification Portal
-- [x] Public portal page (read-only, no PHI)
-- [x] Privacy-preserving status lookup UI
-- [x] Bilingual EN/AR
-- [x] Emergency helpline display
+- [x] Demo mode at /demo — read-only, no login required, all 11 modules
+- [x] DemoLayout with yellow DEMO banner and full sidebar navigation
+- [x] demoRouter — public read-only tRPC procedures for all data types
+- [x] Demo landing page with module grid and sample data summary
+- [x] 7 demo accounts (one per role, password Demo@1234)
+- [x] Demo credentials banner on login page (collapsible, auto-fill on click)
+- [x] Sample data: 3 incidents, 43 casualties, 9 OR cases, 7 ICS forms, 10 comms, 17 resources, 2 EMT MDS reports
 
-## Phase 14: Admin Panel
-- [x] User management (list, edit role, activate/deactivate)
-- [x] Role assignment per user
-- [x] Facility management (list, create, edit)
-- [x] Audit log viewer
+---
 
-## Phase 15: Bilingual EN/AR Support
-- [x] i18n provider with EN/AR translations
-- [x] RTL layout support for Arabic (dir attribute)
-- [x] Language switcher in sidebar
-- [x] Arabic font (Cairo) loaded
+## Internationalisation
 
-## Phase 16: Testing
-- [x] Vitest unit tests for SALT triage algorithm (9 tests)
-- [x] Vitest unit tests for OR state machine (11 tests)
-- [x] Vitest unit tests for provisional ID generation (2 tests)
-- [x] Auth logout test (existing)
+- [x] Bilingual EN/AR support throughout platform
+- [x] RTL layout via document.dir on language switch
+- [x] Cairo font (Arabic) + Inter font (English)
+- [x] Language preference persisted in localStorage
+- [x] Language switcher in sidebar dropdown and demo sidebar
 
-## Remaining / Future
-- [x] Real-time WebSocket push (auto-polling every 10-30s implemented; full WS push is a future enhancement)
-- [x] Full FHIR R4/R5 export endpoint (FHIR-aligned data models implemented; bulk export is a future enhancement)
-- [ ] Barcode/NFC tag scanning integration (future: requires hardware)
-- [ ] Voice input for triage (future: requires browser API integration)
-- [ ] Offline-first PWA service worker (future: not required per user spec)
-- [x] Full Arabic translation coverage (all primary UI strings translated)
-- [x] PDF export for ICS forms and EMT MDS (export button UI implemented; PDF generation is a future enhancement)
-- [x] Push notifications for FLASH priority messages (FLASH priority badge and alert UI implemented)
+---
+
+## Database & Backend
+
+- [x] 16-table MySQL schema (Drizzle ORM)
+- [x] tRPC 11 end-to-end type-safe API
+- [x] All feature routers: incidents, casualties, orCases, resources, transports, icsForms, emtMds, comms, admin, dashboard, invitations, customAuth, demo, system
+- [x] FHIR-aligned data models (FHIR R4/R5 compatible shapes)
+- [x] Provisional identity model (triage tag → civil ID reconciliation)
+- [x] Immutable audit trail on all clinical records
+- [x] password_reset_requests table for admin-visible reset links
+
+---
+
+## Testing
+
+- [x] 61 unit tests passing (Vitest)
+- [x] auth.logout.test.ts (1 test)
+- [x] triage.test.ts (21 tests — SALT algorithm, OR state machine, provisional ID)
+- [x] routers.test.ts (22 tests — OR transitions, role guards, incident codes)
+- [x] invitations.test.ts (17 tests — token generation, expiry, claim validation, admin guard)
+
+---
+
+## Documentation
+
+- [x] README.md v1.1 — deployment guide, auth, demo accounts, standards, MIT licence
+- [x] docs/TECHNICAL.md v1.1 — architecture, custom auth, demo mode, security, roadmap
+- [x] docs/USER_GUIDE.md v1.1 — end-user guide for healthcare workers (all modules, FAQ)
+- [x] LICENSE — MIT licence credited to Saud Naji Alzaid
+
+---
+
+## Planned for v2
+
+- [ ] Email delivery integration (Resend / SendGrid / SMTP) for password reset and invite emails
+- [ ] Real-time WebSocket push (currently polling-based, 10–30s intervals)
+- [ ] FHIR R4/R5 bulk export endpoint
+- [ ] Barcode / NFC tag scanning integration (requires hardware)
+- [ ] Voice input for triage (browser API integration)
+- [ ] Offline-first PWA service worker
+- [ ] Full Arabic translation coverage (remaining hardcoded EN strings in complex forms)
+- [ ] PDF export for ICS forms and EMT MDS reports
