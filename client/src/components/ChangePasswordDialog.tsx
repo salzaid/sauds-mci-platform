@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { useLang } from "@/contexts/LanguageContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ interface ChangePasswordDialogProps {
 }
 
 export default function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialogProps) {
+  const { t } = useLang();
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -25,14 +27,14 @@ export default function ChangePasswordDialog({ open, onOpenChange }: ChangePassw
   const newPassword = watch("newPassword");
 
   const passwordRequirements = [
-    { label: "At least 8 characters", met: newPassword.length >= 8 },
-    { label: "Contains a number", met: /\d/.test(newPassword) },
-    { label: "Contains a letter", met: /[a-zA-Z]/.test(newPassword) },
+    { label: t("auth.passwordReq1"), met: newPassword.length >= 8 },
+    { label: t("auth.passwordReq2"), met: /\d/.test(newPassword) },
+    { label: t("auth.passwordReq3"), met: /[a-zA-Z]/.test(newPassword) },
   ];
 
   const changePassword = trpc.customAuth.changePassword.useMutation({
     onSuccess: () => {
-      toast.success("Password changed successfully");
+      toast.success(t("auth.passwordChanged"));
       reset();
       onOpenChange(false);
     },
@@ -45,15 +47,15 @@ export default function ChangePasswordDialog({ open, onOpenChange }: ChangePassw
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Lock className="h-5 w-5 text-primary" />
-            Change Password
+            {t("auth.changePassword")}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(d => changePassword.mutate(d))} className="space-y-4">
           <div className="space-y-2">
-            <Label>Current Password</Label>
+            <Label>{t("auth.currentPassword")}</Label>
             <div className="relative">
               <Input
-                {...register("currentPassword", { required: "Required" })}
+                {...register("currentPassword", { required: t("common.required") })}
                 type={showCurrent ? "text" : "password"}
                 placeholder="••••••••"
                 className="pr-9"
@@ -67,10 +69,10 @@ export default function ChangePasswordDialog({ open, onOpenChange }: ChangePassw
           </div>
 
           <div className="space-y-2">
-            <Label>New Password</Label>
+            <Label>{t("auth.newPassword")}</Label>
             <div className="relative">
               <Input
-                {...register("newPassword", { required: "Required", minLength: { value: 8, message: "Minimum 8 characters" } })}
+                {...register("newPassword", { required: t("common.required"), minLength: { value: 8, message: t("auth.passwordMin") } })}
                 type={showNew ? "text" : "password"}
                 placeholder="••••••••"
                 className="pr-9"
@@ -94,13 +96,10 @@ export default function ChangePasswordDialog({ open, onOpenChange }: ChangePassw
           </div>
 
           <div className="space-y-2">
-            <Label>Confirm New Password</Label>
+            <Label>{t("auth.confirmPassword")}</Label>
             <div className="relative">
               <Input
-                {...register("confirmPassword", {
-                  required: "Required",
-                  validate: v => v === newPassword || "Passwords do not match",
-                })}
+                {...register("confirmPassword", { required: t("common.required"), validate: v => v === newPassword || t("auth.passwordsNoMatch") })}
                 type={showConfirm ? "text" : "password"}
                 placeholder="••••••••"
                 className="pr-9"
@@ -114,9 +113,9 @@ export default function ChangePasswordDialog({ open, onOpenChange }: ChangePassw
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => { reset(); onOpenChange(false); }}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={() => { reset(); onOpenChange(false); }}>{t("common.cancel")}</Button>
             <Button type="submit" disabled={changePassword.isPending}>
-              {changePassword.isPending ? "Saving..." : "Change Password"}
+              {changePassword.isPending ? t("common.saving") : t("auth.changePassword")}
             </Button>
           </DialogFooter>
         </form>

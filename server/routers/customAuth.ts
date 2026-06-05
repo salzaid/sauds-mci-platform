@@ -181,7 +181,7 @@ export const customAuthRouter = router({
 
   // ── Forgot Password (request reset) ──────────────────────────────────────
   forgotPassword: publicProcedure
-    .input(z.object({ email: z.string().email() }))
+    .input(z.object({ email: z.string().email(), origin: z.string().url().optional() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
@@ -201,10 +201,12 @@ export const customAuthRouter = router({
         passwordResetExpiry: resetExpiry,
       } as any).where(eq(users.id, user.id));
 
+      const origin = input.origin ?? "";
+      const resetUrl = `${origin}/reset-password?token=${resetToken}`;
       // Notify the platform owner with the reset token (in production, send email to user)
       await notifyOwner({
         title: `Password Reset Request — ${user.email}`,
-        content: `User **${user.name ?? user.email}** has requested a password reset.\n\nReset token (valid 1 hour): \`${resetToken}\`\n\nReset URL: {origin}/reset-password?token=${resetToken}\n\nIf you did not request this, ignore this message.`,
+        content: `User **${user.name ?? user.email}** has requested a password reset.\n\nReset URL (valid 1 hour):\n${resetUrl}\n\nIf you did not request this, ignore this message.`,
       });
 
       return { success: true };

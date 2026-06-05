@@ -115,5 +115,5 @@ Last updated: 2026-06-05 | Version: 926ca743
 - [ ] Barcode / NFC tag scanning integration (requires hardware)
 - [ ] Voice input for triage (browser API integration)
 - [ ] Offline-first PWA service worker
-- [ ] Full Arabic translation coverage (remaining hardcoded EN strings in complex forms)
+- [x] Full Arabic translation coverage — 382 keys per language (auth, triage, incidents, OR, resources, transport, ICS, comms, EMT MDS, AAR, admin, dashboard, portal)
 - [ ] PDF export for ICS forms and EMT MDS reports

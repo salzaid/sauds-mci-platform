@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useLocation, Link } from "wouter";
+import { useLang } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,19 +12,20 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 
 const demoAccounts = [
-  { role: "Super Admin",        email: "superadmin@demo.mci",  color: "text-red-400 border-red-500/30" },
-  { role: "Admin",              email: "admin@demo.mci",       color: "text-orange-400 border-orange-500/30" },
-  { role: "Incident Commander", email: "commander@demo.mci",   color: "text-yellow-400 border-yellow-500/30" },
-  { role: "Clinician",          email: "clinician@demo.mci",   color: "text-blue-400 border-blue-500/30" },
-  { role: "Triage Officer",     email: "triage@demo.mci",      color: "text-green-400 border-green-500/30" },
-  { role: "Logistics",          email: "logistics@demo.mci",   color: "text-purple-400 border-purple-500/30" },
-  { role: "Viewer",             email: "viewer@demo.mci",      color: "text-muted-foreground border-border" },
+  { role: "role.superadmin", email: "superadmin@demo.mci", color: "text-red-400 border-red-500/30" },
+  { role: "role.admin",      email: "admin@demo.mci",      color: "text-orange-400 border-orange-500/30" },
+  { role: "role.incident_commander", email: "commander@demo.mci", color: "text-yellow-400 border-yellow-500/30" },
+  { role: "role.clinician",  email: "clinician@demo.mci",  color: "text-blue-400 border-blue-500/30" },
+  { role: "role.triage_officer", email: "triage@demo.mci", color: "text-green-400 border-green-500/30" },
+  { role: "role.logistics",  email: "logistics@demo.mci",  color: "text-purple-400 border-purple-500/30" },
+  { role: "role.viewer",     email: "viewer@demo.mci",     color: "text-muted-foreground border-border" },
 ];
 
 const DEMO_PASSWORD = "Demo@1234";
 
 export default function LoginPage() {
   const [, navigate] = useLocation();
+  const { t, dir } = useLang();
   const [showPassword, setShowPassword] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
   const utils = trpc.useUtils();
@@ -35,7 +37,7 @@ export default function LoginPage() {
   const login = trpc.customAuth.login.useMutation({
     onSuccess: () => {
       utils.auth.me.invalidate();
-      toast.success("Signed in successfully");
+      toast.success(t("auth.signIn"));
       navigate("/dashboard");
     },
     onError: (err) => toast.error(err.message),
@@ -44,17 +46,17 @@ export default function LoginPage() {
   const fillDemo = (email: string) => {
     setValue("email", email);
     setValue("password", DEMO_PASSWORD);
-    toast.info(`Filled: ${email}`);
+    toast.info(email);
   };
 
   const copyPassword = () => {
     navigator.clipboard.writeText(DEMO_PASSWORD)
-      .then(() => toast.success("Password copied to clipboard"))
-      .catch(() => toast.error("Could not copy"));
+      .then(() => toast.success(t("common.copy")))
+      .catch(() => {});
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 gap-4">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 gap-4" dir={dir}>
       {/* Logo */}
       <div className="flex items-center gap-3">
         <div className="p-2 bg-primary/20 rounded-xl">
@@ -75,8 +77,7 @@ export default function LoginPage() {
         >
           <div className="flex items-center gap-2">
             <FlaskConical className="h-4 w-4 shrink-0" />
-            <span className="font-medium">Demo Accounts</span>
-            <span className="text-yellow-400/60 text-xs hidden sm:inline">— click to expand</span>
+            <span className="font-medium">{t("auth.demoAccounts")}</span>
           </div>
           {showDemo ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </button>
@@ -84,17 +85,10 @@ export default function LoginPage() {
         {showDemo && (
           <div className="mt-2 bg-card border border-yellow-500/20 rounded-xl overflow-hidden">
             <div className="px-4 py-2.5 border-b border-border flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">
-                Password for all accounts:
-              </p>
+              <p className="text-xs text-muted-foreground">{t("auth.demoPassword")}:</p>
               <div className="flex items-center gap-2">
                 <code className="text-xs font-mono bg-muted px-2 py-0.5 rounded text-foreground">{DEMO_PASSWORD}</code>
-                <button
-                  type="button"
-                  onClick={copyPassword}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  title="Copy password"
-                >
+                <button type="button" onClick={copyPassword} className="text-muted-foreground hover:text-foreground transition-colors">
                   <Copy className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -108,19 +102,15 @@ export default function LoginPage() {
                   className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-accent/50 transition-colors text-left group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <Badge variant="outline" className={`text-xs shrink-0 ${acc.color}`}>
-                      {acc.role}
-                    </Badge>
+                    <Badge variant="outline" className={`text-xs shrink-0 ${acc.color}`}>{t(acc.role)}</Badge>
                     <span className="text-xs text-muted-foreground font-mono truncate">{acc.email}</span>
                   </div>
-                  <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
-                    Use →
-                  </span>
+                  <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">→</span>
                 </button>
               ))}
             </div>
             <div className="px-4 py-2 bg-muted/30 border-t border-border">
-              <p className="text-xs text-muted-foreground">Click any row to auto-fill the form</p>
+              <p className="text-xs text-muted-foreground">{t("auth.demoAutoFill")}</p>
             </div>
           </div>
         )}
@@ -129,17 +119,17 @@ export default function LoginPage() {
       {/* Login form */}
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center pb-4">
-          <CardTitle className="text-xl">Sign In</CardTitle>
-          <p className="text-sm text-muted-foreground">Enter your credentials to access the platform</p>
+          <CardTitle className="text-xl">{t("auth.signIn")}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t("auth.inviteOnlyDesc")}</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(d => login.mutate(d))} className="space-y-4">
             <div className="space-y-2">
-              <Label>Email Address</Label>
+              <Label>{t("auth.email")}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  {...register("email", { required: "Email is required" })}
+                  {...register("email", { required: t("common.required") })}
                   type="email"
                   placeholder="you@hospital.example"
                   className="pl-9"
@@ -151,25 +141,21 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Password</Label>
+                <Label>{t("auth.password")}</Label>
                 <Link href="/forgot-password" className="text-xs text-primary hover:underline">
-                  Forgot password?
+                  {t("auth.forgotPassword")}
                 </Link>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  {...register("password", { required: "Password is required" })}
+                  {...register("password", { required: t("common.required") })}
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   className="pl-9 pr-9"
                   autoComplete="current-password"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
+                <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
@@ -177,24 +163,18 @@ export default function LoginPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={login.isPending}>
-              {login.isPending ? "Signing in..." : "Sign In"}
+              {login.isPending ? t("auth.signingIn") : t("auth.signIn")}
             </Button>
           </form>
 
           <div className="mt-4 text-center">
             <p className="text-xs text-muted-foreground">
-              Don't have an account?{" "}
-              <Link href="/" className="text-primary hover:underline">
-                Request access from your administrator
-              </Link>
+              {t("auth.noAccount")}{" "}
+              <Link href="/" className="text-primary hover:underline">{t("auth.requestAccess")}</Link>
             </p>
           </div>
         </CardContent>
       </Card>
-
-      <p className="text-xs text-muted-foreground text-center max-w-sm">
-        Access is restricted to authorised personnel only. By signing in you agree to use this platform in accordance with applicable data protection policies.
-      </p>
     </div>
   );
 }

@@ -62,7 +62,7 @@ export default function Dashboard() {
         </div>
         <Button variant="outline" size="sm" onClick={() => { overview.refetch(); incidents.refetch(); }}>
           <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
+          {t("common.refresh")}
         </Button>
       </div>
 
@@ -85,9 +85,9 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-3">
-            <CardTitle className="text-base font-semibold">Active Incidents</CardTitle>
+            <CardTitle className="text-base font-semibold">{t("dashboard.activeIncidents")}</CardTitle>
             <Link href="/incidents" className="text-xs text-primary flex items-center gap-1 hover:underline">
-                View all <ChevronRight className="h-3 w-3" />
+                {t("common.view")} <ChevronRight className="h-3 w-3" />
             </Link>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -96,7 +96,7 @@ export default function Dashboard() {
             ) : incidents.data?.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <AlertTriangle className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                <p className="text-sm">No active incidents</p>
+                <p className="text-sm">{t("dashboard.noActiveIncidents")}</p>
               </div>
             ) : (
               incidents.data?.map(inc => (
@@ -127,23 +127,22 @@ export default function Dashboard() {
         {/* Quick Actions */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Quick Actions</CardTitle>
+            <CardTitle className="text-base font-semibold">{t("dashboard.quickNav")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-3">
             {[
-              { label: "Declare Incident", labelAr: "الإعلان عن حادث", href: "/incidents", icon: AlertTriangle, color: "text-red-400" },
-              { label: "Register Casualty", labelAr: "تسجيل ضحية", href: "/triage", icon: Users, color: "text-yellow-400" },
-              { label: "OR Queue", labelAr: "قائمة العمليات", href: "/or-queue", icon: Syringe, color: "text-blue-400" },
-              { label: "Resources", labelAr: "الموارد", href: "/resources", icon: Activity, color: "text-green-400" },
-              { label: "ICS Forms", labelAr: "نماذج ICS", href: "/ics-forms", icon: Radio, color: "text-purple-400" },
-              { label: "After-Action", labelAr: "مراجعة الحادث", href: "/aar", icon: Activity, color: "text-orange-400" },
+              { key: "incident.create", href: "/incidents", icon: AlertTriangle, color: "text-red-400" },
+              { key: "triage.registerCasualty", href: "/triage", icon: Users, color: "text-yellow-400" },
+              { key: "nav.orQueue", href: "/or-queue", icon: Syringe, color: "text-blue-400" },
+              { key: "nav.resources", href: "/resources", icon: Activity, color: "text-green-400" },
+              { key: "nav.icsForms", href: "/ics-forms", icon: Radio, color: "text-purple-400" },
+              { key: "nav.aar", href: "/aar", icon: Activity, color: "text-orange-400" },
             ].map(action => {
               const Icon = action.icon;
               return (
                 <Link key={action.href} href={action.href} className="flex flex-col items-center gap-2 p-4 rounded-lg border border-border hover:border-primary/50 hover:bg-accent transition-all text-center">
                     <Icon className={`h-6 w-6 ${action.color}`} />
-                    <span className="text-xs font-medium">{action.label}</span>
-                    <span className="text-xs text-muted-foreground">{action.labelAr}</span>
+                    <span className="text-xs font-medium">{t(action.key)}</span>
                 </Link>
               );
             })}
