@@ -135,30 +135,45 @@ The repository includes two GitHub Actions workflows that run automatically on e
 
 Both workflows use the built-in `GITHUB_TOKEN` — **no extra secrets or configuration needed**.
 
-#### Pre-built image
+#### Pre-built image (live ✅)
 
-After the first push to `main` triggers the workflow, the image is available at:
+The image is publicly available on GitHub Container Registry. No authentication required to pull:
 
 ```bash
 docker pull ghcr.io/salzaid/sauds-mci-platform:latest
 ```
 
-Version tags produce additional pinned tags:
+> **Image size:** ~135 MB (Node 22 Alpine, multi-stage build)
+
+Version tags are also available for pinned deployments:
 
 ```bash
-docker pull ghcr.io/salzaid/sauds-mci-platform:1.0.0
-docker pull ghcr.io/salzaid/sauds-mci-platform:1.0
-docker pull ghcr.io/salzaid/sauds-mci-platform:1
+docker pull ghcr.io/salzaid/sauds-mci-platform:main
 ```
 
-Using the pre-built image in `docker-compose.yml` (replace the `build:` block):
+#### Quickstart with the pre-built image
+
+The fastest way to run the platform is to use the pre-built image with `docker compose`. Replace the `build:` block in `docker-compose.yml` with the image reference:
 
 ```yaml
 services:
   app:
     image: ghcr.io/salzaid/sauds-mci-platform:latest
-    # remove the build: block when using the pre-built image
+    # remove the build: context block — no local build needed
 ```
+
+Or run a standalone container against an existing MySQL database:
+
+```bash
+docker run -d \
+  --name mci-platform \
+  -p 3000:3000 \
+  -e DATABASE_URL="mysql://user:password@your-db-host:3306/mci" \
+  -e JWT_SECRET="your-secret-min-32-chars" \
+  ghcr.io/salzaid/sauds-mci-platform:latest
+```
+
+View the Actions tab for build status: [github.com/salzaid/sauds-mci-platform/actions](https://github.com/salzaid/sauds-mci-platform/actions)
 
 ---
 
@@ -227,17 +242,24 @@ docker compose down -v
 
 #### Option B — Docker (standalone, bring your own database)
 
-```bash
-# Build the image
-docker build -t mci-platform:latest .
+Use the pre-built image from GHCR — no build step required:
 
-# Run with your database credentials
+```bash
 docker run -d \
   --name mci-platform \
   -p 3000:3000 \
   -e DATABASE_URL="mysql://user:password@your-db-host:3306/mci" \
   -e JWT_SECRET="your-secret-min-32-chars" \
-  mci-platform:latest
+  ghcr.io/salzaid/sauds-mci-platform:latest
+```
+
+Or build from source if you have made local modifications:
+
+```bash
+docker build -t mci-platform:local .
+docker run -d --name mci-platform -p 3000:3000 \
+  -e DATABASE_URL="..." -e JWT_SECRET="..." \
+  mci-platform:local
 ```
 
 #### Option C — Manual Node.js
