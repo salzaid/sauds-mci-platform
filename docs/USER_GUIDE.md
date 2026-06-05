@@ -4,7 +4,7 @@
 
 **Platform:** Saud's MCI & Disaster Management Platform  
 **Version:** 1.1  
-**Author:** Saud Naji Alzaid  
+**Author:** Saud N Alzaid  
 **Audience:** Emergency physicians, triage officers, nurses, surgeons, logistics coordinators, incident commanders
 
 ---
@@ -411,4 +411,4 @@ A: Yes. Share the link `{platform-url}/demo` — it is a fully interactive, read
 *This guide covers platform version 1.1. For the most current version, refer to the platform's built-in help or contact your administrator.*
 
 *Saud's MCI Platform*  
-*© 2026 Saud Naji Alzaid — MIT License*
+*© 2026 Saud N Alzaid — MIT License*

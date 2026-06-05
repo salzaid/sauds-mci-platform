@@ -103,7 +103,7 @@ Last updated: 2026-06-05 | Version: 926ca743
 - [x] README.md v1.1 — deployment guide, auth, demo accounts, standards, MIT licence
 - [x] docs/TECHNICAL.md v1.1 — architecture, custom auth, demo mode, security, roadmap
 - [x] docs/USER_GUIDE.md v1.1 — end-user guide for healthcare workers (all modules, FAQ)
-- [x] LICENSE — MIT licence credited to Saud Naji Alzaid
+- [x] LICENSE — MIT licence credited to Saud N Alzaid
 
 ---
 

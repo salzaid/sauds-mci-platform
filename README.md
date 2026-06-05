@@ -2,7 +2,7 @@
 
 > **A comprehensive, web-based Mass Casualty Incident (MCI) and Disaster Management Platform for hospital networks and emergency response organisations.**
 
-Built and designed by **Saud Naji Alzaid**, this platform supports the full chain of survival — from scene triage through definitive surgical care, inter-facility coordination, and after-action review — aligned with internationally recognised standards including SALT, HICS, CO-S-TR, WHO EMT MDS, and HL7 FHIR R4/R5.
+Built and designed by **Saud N Alzaid**, this platform supports the full chain of survival — from scene triage through definitive surgical care, inter-facility coordination, and after-action review — aligned with internationally recognised standards including SALT, HICS, CO-S-TR, WHO EMT MDS, and HL7 FHIR R4/R5.
 
 **Live Demo (no login required):** [`/demo`](https://mcidisaster-rpshy88v.manus.space/demo)
 
@@ -363,7 +363,7 @@ This project is licensed under the **MIT License**.
 ```
 MIT License
 
-Copyright (c) 2026 Saud Naji Alzaid
+Copyright (c) 2026 Saud N Alzaid
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -388,9 +388,9 @@ SOFTWARE.
 
 ## Credits & Acknowledgements
 
-**Platform Owner & Architect:** Saud Naji Alzaid
+**Platform Owner & Architect:** Saud N Alzaid
 
-This platform was designed and built by Saud Naji Alzaid. The clinical decision logic, triage algorithms, and operational workflows are based on the following internationally recognised standards and publications:
+This platform was designed and built by Saud N Alzaid. The clinical decision logic, triage algorithms, and operational workflows are based on the following internationally recognised standards and publications:
 
 - ASPR TRACIE — Hospital Mass Casualty Response Plan Considerations and CO-S-TR Model
 - California Hospital Association — Hospital Incident Command System (HICS)

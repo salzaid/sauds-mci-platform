@@ -1,7 +1,7 @@
 # Saud's MCI Platform — Technical Documentation
 
 **Document version:** 1.1  
-**Author:** Saud Naji Alzaid  
+**Author:** Saud N Alzaid  
 **Audience:** Software engineers, DevOps/SRE, security engineers, QA  
 **Status:** Implementation reference
 

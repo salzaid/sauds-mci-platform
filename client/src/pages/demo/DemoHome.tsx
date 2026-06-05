@@ -66,7 +66,7 @@ export default function DemoHome() {
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Built by <span className="font-medium text-foreground">Saud Naji Alzaid</span> · MIT License · 3 incidents · 43 casualties · Full sample data pre-loaded
+              Built by <span className="font-medium text-foreground">Saud N Alzaid</span> · MIT License · 3 incidents · 43 casualties · Full sample data pre-loaded
             </p>
           </div>
         </div>
@@ -128,7 +128,7 @@ export default function DemoHome() {
             ))}
           </div>
           <p className="text-center text-xs text-muted-foreground mt-4">
-            © 2026 Saud Naji Alzaid · MIT License · <Link href="/" className="text-primary hover:underline">Live Platform</Link>
+            © 2026 Saud N Alzaid · MIT License · <Link href="/" className="text-primary hover:underline">Live Platform</Link>
           </p>
         </div>
       </div>
