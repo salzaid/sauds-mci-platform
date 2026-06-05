@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Settings, Users, Building2, Shield, Search, Plus, Edit, Mail, Send, Copy, RefreshCw, XCircle, Clock, UserPlus, CheckCircle } from "lucide-react";
+import { Settings, Users, Building2, Shield, Search, Plus, Edit, Mail, Send, Copy, RefreshCw, XCircle, Clock, UserPlus, CheckCircle, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -52,6 +52,7 @@ export default function AdminPanel() {
   const [showCreateFacility, setShowCreateFacility] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [showCreateUser, setShowCreateUser] = useState(false);
+  const [setPasswordUser, setSetPasswordUser] = useState<any>(null);
   const [inviteResult, setInviteResult] = useState<{ inviteUrl: string; email: string } | null>(null);
   const [prefillEmail, setPrefillEmail] = useState("");
   const [search, setSearch] = useState("");
@@ -104,6 +105,11 @@ export default function AdminPanel() {
     onError: (err) => toast.error(err.message),
   });
 
+  const adminSetPassword = trpc.customAuth.adminSetPassword.useMutation({
+    onSuccess: () => { setSetPasswordUser(null); resetPw(); toast.success("Password updated successfully"); },
+    onError: (err) => toast.error(err.message),
+  });
+
   const updateRequest = trpc.system.updateAccessRequest.useMutation({
     onSuccess: () => { utils.system.listAccessRequests.invalidate(); toast.success("Request updated"); },
     onError: (err) => toast.error(err.message),
@@ -112,6 +118,11 @@ export default function AdminPanel() {
   const { register: registerCreate, handleSubmit: handleSubmitCreate, reset: resetCreate, setValue: setValueCreate } = useForm({
     defaultValues: { name: "", email: "", role: "viewer", facilityId: undefined as number | undefined, jobTitle: "", phone: "", preferredLang: "en" },
   });
+
+  const { register: registerPw, handleSubmit: handleSubmitPw, reset: resetPw, watch: watchPw } = useForm({
+    defaultValues: { newPassword: "", confirmPassword: "" },
+  });
+  const pwValue = watchPw("newPassword");
 
   const { register: registerU, handleSubmit: handleSubmitU, setValue: setValueU } = useForm();
   const { register: registerF, handleSubmit: handleSubmitF, reset: resetFac, setValue: setValueF } = useForm({
@@ -454,9 +465,59 @@ export default function AdminPanel() {
               <Switch id="active" defaultChecked={editUser?.isActive} onCheckedChange={v => setValueU("isActive", v)} />
               <Label htmlFor="active">Active Account</Label>
             </div>
+            <div className="pt-2 border-t border-border">
+              <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => { setSetPasswordUser(editUser); setEditUser(null); }}>
+                <KeyRound className="h-4 w-4 mr-2" />Set Password for This User
+              </Button>
+            </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setEditUser(null)}>Cancel</Button>
               <Button type="submit" disabled={updateUser.isPending}>{updateUser.isPending ? "Saving..." : "Save Changes"}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Set Password Dialog ─────────────────────────────────────────────────────────────────────────────────── */}
+      <Dialog open={!!setPasswordUser} onOpenChange={v => { if (!v) { setSetPasswordUser(null); resetPw(); } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="h-5 w-5 text-primary" />
+              Set Password for {setPasswordUser?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmitPw(d => adminSetPassword.mutate({ userId: setPasswordUser?.id, newPassword: d.newPassword }))} className="space-y-4">
+            <div className="p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground">
+              This will immediately replace the user's current password. They will need to use this new password on their next sign-in.
+            </div>
+            <div className="space-y-2">
+              <Label>New Password *</Label>
+              <Input {...registerPw("newPassword", { required: true, minLength: { value: 8, message: "Minimum 8 characters" } })} type="password" placeholder="••••••••" autoComplete="new-password" />
+              {pwValue.length > 0 && (
+                <div className="space-y-1">
+                  {[
+                    { label: "At least 8 characters", met: pwValue.length >= 8 },
+                    { label: "Contains a number", met: /\d/.test(pwValue) },
+                    { label: "Contains a letter", met: /[a-zA-Z]/.test(pwValue) },
+                  ].map(req => (
+                    <div key={req.label} className="flex items-center gap-2 text-xs">
+                      {req.met ? <CheckCircle className="h-3.5 w-3.5 text-green-400 shrink-0" /> : <XCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
+                      <span className={req.met ? "text-green-400" : "text-muted-foreground"}>{req.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label>Confirm Password *</Label>
+              <Input {...registerPw("confirmPassword", { required: true, validate: v => v === pwValue || "Passwords do not match" })} type="password" placeholder="••••••••" autoComplete="new-password" />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => { setSetPasswordUser(null); resetPw(); }}>Cancel</Button>
+              <Button type="submit" disabled={adminSetPassword.isPending}>
+                {adminSetPassword.isPending ? "Setting..." : "Set Password"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>

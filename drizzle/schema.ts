@@ -381,3 +381,19 @@ export const accessRequests = mysqlTable("access_requests", {
 
 export type AccessRequest = typeof accessRequests.$inferSelect;
 export type InsertAccessRequest = typeof accessRequests.$inferInsert;
+
+// ─── Password Reset Requests ───────────────────────────────────────────────────────────────────────────────────
+
+export const passwordResetRequests = mysqlTable("password_reset_requests", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  name: varchar("name", { length: 256 }),
+  resetToken: varchar("resetToken", { length: 128 }).notNull(),
+  resetUrl: text("resetUrl").notNull(),
+  status: mysqlEnum("status", ["PENDING","USED","EXPIRED"]).default("PENDING").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  usedAt: timestamp("usedAt"),
+});
+
+export type PasswordResetRequest = typeof passwordResetRequests.$inferSelect;
