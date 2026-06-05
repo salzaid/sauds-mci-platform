@@ -81,10 +81,12 @@ export const adminRouter = router({
   updateUser: protectedProcedure
     .input(z.object({
       id: z.number(),
+      name: z.string().min(2).max(256).optional(),
+      email: z.string().email().optional(),
       role: z.enum(roles).optional(),
       facilityId: z.number().nullable().optional(),
-      jobTitle: z.string().optional(),
-      phone: z.string().optional(),
+      jobTitle: z.string().max(128).nullable().optional(),
+      phone: z.string().max(32).nullable().optional(),
       isActive: z.boolean().optional(),
       preferredLang: z.enum(["en","ar"]).optional(),
     }))
@@ -99,6 +101,21 @@ export const adminRouter = router({
       await db.update(users).set(filteredUpdates as any).where(eq(users.id, id));
       const [updated] = await db.select().from(users).where(eq(users.id, id)).limit(1);
       return updated;
+    }),
+
+  deleteUser: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.user.role !== "superadmin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only superadmins can delete users." });
+      }
+      if (input.id === ctx.user.id) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot delete your own account." });
+      }
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      await db.delete(users).where(eq(users.id, input.id));
+      return { success: true };
     }),
 
   // ── Facilities ─────────────────────────────────────────────────────────────

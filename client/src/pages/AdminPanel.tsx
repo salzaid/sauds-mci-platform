@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Settings, Users, Building2, Shield, Search, Plus, Edit, Mail, Send, Copy, RefreshCw, XCircle, Clock, UserPlus, CheckCircle, KeyRound } from "lucide-react";
+import { Settings, Users, Building2, Shield, Search, Plus, Edit, Mail, Send, Copy, RefreshCw, XCircle, Clock, UserPlus, CheckCircle, KeyRound, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -102,6 +102,11 @@ export default function AdminPanel() {
 
   const createUser = trpc.admin.createUser.useMutation({
     onSuccess: () => { utils.admin.listUsers.invalidate(); setShowCreateUser(false); toast.success("User created successfully"); resetCreate(); },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const deleteUser = trpc.admin.deleteUser.useMutation({
+    onSuccess: () => { utils.admin.listUsers.invalidate(); setEditUser(null); toast.success("User deleted"); },
     onError: (err) => toast.error(err.message),
   });
 
@@ -451,24 +456,84 @@ export default function AdminPanel() {
 
       {/* ── Edit User Dialog ─────────────────────────────────────────────────── */}
       <Dialog open={!!editUser} onOpenChange={() => setEditUser(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Edit User: {editUser?.name}</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5 text-primary" />
+              Edit User Profile
+            </DialogTitle>
+          </DialogHeader>
           <form onSubmit={handleSubmitU(d => updateUser.mutate({ id: editUser.id, ...d as any }))} className="space-y-4">
-            <div className="space-y-2"><Label>Role</Label>
-              <Select onValueChange={v => setValueU("role", v)} defaultValue={editUser?.role}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{roles.map(r => <SelectItem key={r} value={r}>{t(`role.${r}`)}</SelectItem>)}</SelectContent>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2 col-span-2">
+                <Label>Full Name</Label>
+                <Input {...registerU("name")} defaultValue={editUser?.name ?? ""} placeholder="Dr. Ahmed Al-Rashidi" />
+              </div>
+              <div className="space-y-2 col-span-2">
+                <Label>Email Address</Label>
+                <Input {...registerU("email")} type="email" defaultValue={editUser?.email ?? ""} placeholder="user@hospital.example" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Job Title</Label>
+                <Input {...registerU("jobTitle")} defaultValue={editUser?.jobTitle ?? ""} placeholder="Emergency Physician" />
+              </div>
+              <div className="space-y-2">
+                <Label>Phone</Label>
+                <Input {...registerU("phone")} defaultValue={editUser?.phone ?? ""} placeholder="+965-XXXX-XXXX" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Role</Label>
+                <Select onValueChange={v => setValueU("role", v)} defaultValue={editUser?.role}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{roles.map(r => <SelectItem key={r} value={r}>{t(`role.${r}`)}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Language</Label>
+                <Select onValueChange={v => setValueU("preferredLang", v)} defaultValue={editUser?.preferredLang ?? "en"}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="ar">العربية</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Facility</Label>
+              <Select onValueChange={v => setValueU("facilityId", v === "none" ? null : Number(v))} defaultValue={editUser?.facilityId?.toString() ?? "none"}>
+                <SelectTrigger><SelectValue placeholder="No specific facility" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No specific facility</SelectItem>
+                  {facilities?.map(f => <SelectItem key={f.id} value={f.id.toString()}>{f.name}</SelectItem>)}
+                </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2"><Label>Job Title</Label><Input {...registerU("jobTitle")} defaultValue={editUser?.jobTitle ?? ""} /></div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 pt-1">
               <Switch id="active" defaultChecked={editUser?.isActive} onCheckedChange={v => setValueU("isActive", v)} />
               <Label htmlFor="active">Active Account</Label>
             </div>
-            <div className="pt-2 border-t border-border">
-              <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => { setSetPasswordUser(editUser); setEditUser(null); }}>
-                <KeyRound className="h-4 w-4 mr-2" />Set Password for This User
+            <div className="flex gap-2 pt-2 border-t border-border">
+              <Button type="button" variant="outline" size="sm" className="flex-1" onClick={() => { setSetPasswordUser(editUser); setEditUser(null); }}>
+                <KeyRound className="h-4 w-4 mr-2" />Set Password
               </Button>
+              {user?.role === "superadmin" && editUser?.id !== user?.id && (
+                <Button type="button" variant="outline" size="sm"
+                  className="text-destructive hover:text-destructive border-destructive/30 hover:border-destructive/60"
+                  onClick={() => {
+                    if (confirm(`Delete user "${editUser?.name}"? This cannot be undone.`)) {
+                      deleteUser.mutate({ id: editUser.id });
+                    }
+                  }}
+                  disabled={deleteUser.isPending}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />Delete User
+                </Button>
+              )}
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setEditUser(null)}>Cancel</Button>
