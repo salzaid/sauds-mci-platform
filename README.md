@@ -126,29 +126,87 @@ Manus provides built-in hosting with custom domain support, automatic SSL, a man
 
 ### Self-Hosted Deployment
 
-For on-premises or cloud deployments (e.g., organisations with data-residency requirements):
+For on-premises or cloud deployments (e.g., organisations with data-residency requirements). The repository ships with a `Dockerfile` and `docker-compose.yml`.
 
-#### Option A — Docker (Recommended for self-hosting)
+#### Option A — Docker Compose (Recommended — includes MySQL)
+
+**1. Clone the repository**
 
 ```bash
-# Build the production image
+git clone https://github.com/salzaid/sauds-mci-platform.git
+cd sauds-mci-platform
+```
+
+**2. Create your `.env` file**
+
+Create a `.env` file in the project root with at minimum:
+
+```env
+DATABASE_URL=mysql://mci_user:changeme@db:3306/mci_platform
+MYSQL_PASSWORD=changeme
+MYSQL_ROOT_PASSWORD=rootpassword
+JWT_SECRET=replace-with-a-random-string-of-at-least-32-characters
+```
+
+All Manus OAuth variables are optional if you are using email/password authentication only.
+
+**3. Start the full stack**
+
+```bash
+docker compose up -d
+```
+
+This starts a MySQL 8 container (with health check) and the application container on port 3000. The app waits for the database to be ready before starting.
+
+**4. Apply the database schema (first run only)**
+
+```bash
+# Connect to the MySQL container and apply migrations
+docker compose exec db mysql -u mci_user -pchangeme mci_platform
+```
+
+Then paste the SQL from `drizzle/migrations/` to create all 16 tables.
+
+**5. Access the platform**
+
+Open `http://localhost:3000`. Sign in at `/login` using the demo accounts or create your first admin via the invite flow.
+
+**Useful Docker Compose commands**
+
+```bash
+# View application logs
+docker compose logs -f app
+
+# Restart after code changes
+docker compose up -d --build
+
+# Stop the stack
+docker compose down
+
+# Stop and remove all data (destructive)
+docker compose down -v
+```
+
+#### Option B — Docker (standalone, bring your own database)
+
+```bash
+# Build the image
 docker build -t mci-platform:latest .
 
-# Run with environment variables
+# Run with your database credentials
 docker run -d \
+  --name mci-platform \
   -p 3000:3000 \
-  -e DATABASE_URL="mysql://user:password@host:3306/mci" \
-  -e JWT_SECRET="your-secret-here-min-32-chars" \
+  -e DATABASE_URL="mysql://user:password@your-db-host:3306/mci" \
+  -e JWT_SECRET="your-secret-min-32-chars" \
   mci-platform:latest
 ```
 
-#### Option B — Manual Node.js
+#### Option C — Manual Node.js
 
 ```bash
-# Build for production
+pnpm install
 pnpm build
-
-# Start the production server
 NODE_ENV=production node dist/index.js
 ```
 

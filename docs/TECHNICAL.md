@@ -368,9 +368,19 @@ bcrypt at cost factor 12 adds approximately 250ms to login and registration oper
 
 The recommended deployment for most organisations. Manus provides managed MySQL, object storage, OAuth, CDN, and SSL with zero infrastructure management. Suitable for regional command centres and multi-facility coordination.
 
-### Hospital On-Premises
+### Hospital On-Premises (Docker Compose)
 
-For hospitals with data-residency requirements, the platform can be deployed on a hospital's own infrastructure using Docker or Kubernetes. A `k3s` single-node deployment is sufficient for a facility-level instance.
+For hospitals with data-residency requirements, the repository ships with a `Dockerfile` and `docker-compose.yml` that spin up the application and a MySQL 8 database together. The stack requires only Docker and a `.env` file with `DATABASE_URL`, `JWT_SECRET`, and MySQL credentials.
+
+Key characteristics of the Docker deployment:
+
+- The `Dockerfile` uses a two-stage build (Node 22 Alpine builder + slim runner) to minimise the final image size.
+- The `docker-compose.yml` defines a `db` service (MySQL 8 with a health check) and an `app` service that waits for the database to be healthy before starting.
+- A named volume (`mci-db-data`) persists the database across container restarts.
+- The application health check polls `/api/trpc/system.health` every 30 seconds.
+- All secrets are injected via environment variables; no secrets are baked into the image.
+
+For a Kubernetes deployment, the same image can be used with a `Deployment` + `Service` manifest, with the database provided by a managed RDS/Cloud SQL instance or a MySQL `StatefulSet`.
 
 ### Tactical Edge (Future)
 
