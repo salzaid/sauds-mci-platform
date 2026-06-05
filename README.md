@@ -83,7 +83,7 @@ The platform uses a **custom email/password authentication system** — no third
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-org/mci-platform.git
+git clone https://github.com/salzaid/sauds-mci-platform.git
 cd mci-platform
 
 # 2. Install dependencies

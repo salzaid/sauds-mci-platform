@@ -24,7 +24,7 @@ export default function About() {
             <span className="font-semibold text-sm">Saud's MCI Platform</span>
           </div>
           <a
-            href="https://github.com/saud-alzaid/mci-platform"
+            href="https://github.com/salzaid/sauds-mci-platform"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -57,7 +57,7 @@ export default function About() {
           </p>
           <div className="flex flex-wrap gap-3">
             <a
-              href="https://github.com/saud-alzaid/mci-platform"
+              href="https://github.com/salzaid/sauds-mci-platform"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-foreground text-background rounded-xl text-sm font-medium hover:bg-foreground/90 transition-colors"
@@ -121,13 +121,13 @@ export default function About() {
               </div>
               <div className="mt-4 pt-4 border-t border-border">
                 <a
-                  href="https://github.com/saud-alzaid"
+                  href="https://github.com/salzaid"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <Github className="h-4 w-4" />
-                  github.com/saud-alzaid
+                  github.com/salzaid
                   <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
@@ -193,7 +193,7 @@ export default function About() {
               </p>
             </div>
             <a
-              href="https://github.com/saud-alzaid/mci-platform"
+              href="https://github.com/salzaid/sauds-mci-platform"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-6 py-3 bg-foreground text-background rounded-xl text-sm font-medium hover:bg-foreground/90 transition-colors shrink-0"
