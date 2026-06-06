@@ -72,6 +72,48 @@ The platform uses a **custom email/password authentication system** — no third
 
 ---
 
+## Minimum System Requirements
+
+Requirements vary depending on how you deploy the platform.
+
+### Docker Compose (Recommended — app + MySQL in containers)
+
+| Component | Minimum | Recommended |
+|---|---|---|
+| **CPU** | 2 vCPU | 4 vCPU |
+| **RAM** | 2 GB | 4 GB |
+| **Disk** | 5 GB free | 20 GB free |
+| **OS** | Linux (Ubuntu 20.04+), macOS 12+, Windows 10+ with WSL2 |
+| **Docker Engine** | 24.0+ | 26.0+ |
+| **Docker Compose** | v2.20+ (plugin) | Latest |
+| **Network** | Outbound internet (to pull image from GHCR) | |
+
+> **Note:** The 2 GB RAM minimum is tight. MySQL 8 alone uses ~400–600 MB on first initialisation. If you experience slow startup or container restarts, increase RAM to 4 GB.
+
+### Manual Node.js (no Docker)
+
+| Component | Minimum | Recommended |
+|---|---|---|
+| **CPU** | 1 vCPU | 2 vCPU |
+| **RAM** | 512 MB | 1 GB |
+| **Disk** | 1 GB free | 5 GB free |
+| **Node.js** | 22.x LTS | Latest LTS |
+| **pnpm** | 10.x | Latest |
+| **MySQL** | 8.0 | 8.4 |
+
+### Browser (end users)
+
+| Browser | Minimum version |
+|---|---|
+| Chrome / Edge | 110+ |
+| Firefox | 110+ |
+| Safari | 16+ |
+| Mobile Chrome / Safari | iOS 16+ / Android 12+ |
+
+> The platform does not support Internet Explorer or legacy Edge (EdgeHTML).
+
+---
+
 ## Quick Start (Local Development)
 
 ### Prerequisites
